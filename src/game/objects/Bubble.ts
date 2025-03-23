@@ -1,6 +1,5 @@
 import { Scene } from "phaser";
-import { Game } from "../scenes/Game";
-
+import { NasalesGame } from "../scenes/NasalesGame";
 
 export interface BubbleConfig {
     name: string;
@@ -27,6 +26,7 @@ export class Bubble {
     private readonly imageKey: string;
     private initialPosition: Position;
     private isSelected: boolean;
+    private floatingTween: Phaser.Tweens.Tween | null = null;
     public isPopped: boolean;
 
     constructor(scene: Scene, config: BubbleConfig) {
@@ -38,12 +38,10 @@ export class Bubble {
         this.initialPosition = { x: config.x, y: config.y };
 
         this.create(config.x, config.y);
-        this.addFloatingAnimation();
         this.setupInteraction();
     }
 
     private create(x: number, y: number): void {
-        // Crear la burbuja
         this.objectSprite = this.scene.add.sprite(x, y, this.imageKey);
         this.objectSprite.setScale(0.3);
         this.objectSprite.setVisible(true);
@@ -58,7 +56,10 @@ export class Bubble {
 
         const handleClick = () => {
             if (!this.isPopped && !this.isSelected) {
-                this.moveToCenter();
+                const nasalesScene = this.scene as NasalesGame;
+                if (!nasalesScene.isBubbleActive()) {
+                    this.moveToCenter();
+                }
             }
         };
 
@@ -66,26 +67,37 @@ export class Bubble {
         this.objectSprite.on("pointerdown", handleClick);
     }
 
-    private addFloatingAnimation(): void {
-        if (!this.isSelected) {
-            this.scene.tweens.add({
-                targets: [this.bubbleSprite, this.objectSprite],
-                y: this.bubbleSprite.y - 50,
-                duration: 2000,
-                ease: "Sine.easeInOut",
-                yoyo: true,
-                repeat: -1,
-            });
+    public addFloatingAnimation(): void {
+        if (!this.isSelected && !this.isPopped && this.bubbleSprite && this.objectSprite) {
+        // Detener animación anterior si existe
+        if (this.floatingTween) {
+            this.floatingTween.stop();
+            this.floatingTween = null;
         }
+        
+        this.floatingTween = this.scene.tweens.add({
+            targets: [this.bubbleSprite, this.objectSprite],
+            y: this.initialPosition.y - 50,
+            duration: 2000,
+            ease: "Sine.easeInOut",
+            yoyo: true,
+            repeat: -1,
+        });
+    }
     }
 
     public moveToCenter(): void {
         this.isSelected = true;
+        const scene = this.scene as NasalesGame;
+        scene.onBubbleSelected(this);
 
         // Detener la animación de flotación actual
-        this.scene.tweens.killTweensOf([this.bubbleSprite, this.objectSprite]);
+        if (this.floatingTween) {
+            this.floatingTween.stop();
+            this.floatingTween = null;
+        }
 
-        const centerX = this.scene.cameras.main.centerX;
+        const centerX = this.initialPosition.x;
         const centerY = this.scene.cameras.main.centerY;
 
         this.scene.tweens.add({
@@ -96,19 +108,14 @@ export class Bubble {
             duration: 500,
             ease: "Power2",
         });
-        // Animar el movimiento al centro
+
         this.scene.tweens.add({
             targets: [this.bubbleSprite],
             x: centerX,
             y: centerY,
             scale: 1.5,
             duration: 500,
-            ease: "Power2",
-            onComplete: () => {
-                // Notificar a la escena que esta burbuja está seleccionada
-                const scene = this.scene as Game;
-                scene.onBubbleSelected(this);
-            },
+            ease: "Power2"
         });
     }
 
@@ -122,7 +129,7 @@ export class Bubble {
             scale: 0.3,
             duration: 500,
             ease: "Power2",
-        })
+        });
 
         this.scene.tweens.add({
             targets: [this.bubbleSprite],
@@ -142,6 +149,12 @@ export class Bubble {
 
         this.isPopped = true;
 
+        // Detener cualquier animación existente
+        if (this.floatingTween) {
+            this.floatingTween.stop();
+            this.floatingTween = null;
+        }
+
         // Animación de explosión de la burbuja
         this.scene.tweens.add({
             targets: this.bubbleSprite,
@@ -151,22 +164,43 @@ export class Bubble {
             onComplete: () => {
                 this.bubbleSprite.destroy();
 
+                const randomX = Phaser.Math.Between(100, this.scene.cameras.main.width - 100);
+                const randomY = Phaser.Math.Between(100, 200); // Parte superior
+
                 // Retornar solo el objeto a su posición inicial
                 this.scene.tweens.add({
                     targets: this.objectSprite,
-                    x: this.initialPosition.x,
-                    y: this.initialPosition.y,
-                    scale: 1.5,
+                    x: randomX,
+                    y: randomY,
+                    scale: 0.5,
                     duration: 500,
                     ease: "Power2",
+                    onComplete: () => {
+                        // Notificar a NasalesGame que se completó este objeto
+                        const nasalesScene = this.scene as NasalesGame;
+                        nasalesScene.onBubblePopped(this);
+                    }
                 });
             },
         });
     }
 
     public destroy(): void {
+        if (this.floatingTween) {
+            this.floatingTween.stop();
+            this.floatingTween = null;
+        }
+        
         this.bubbleSprite.destroy();
         this.objectSprite.destroy();
+    }
+
+    public getBubbleSprite(): Phaser.GameObjects.Sprite {
+    return this.bubbleSprite;
+}
+
+    public getObjectSprite(): Phaser.GameObjects.Sprite {
+        return this.objectSprite;
     }
 
     public getName(): string {
@@ -175,5 +209,22 @@ export class Bubble {
 
     public isActive(): boolean {
         return this.isSelected;
+    }
+
+    public getPosition(): Position {
+        return this.initialPosition;
+    }
+
+    public setPosition(x?: number, y?: number): void {
+        if (x !== undefined) {
+            this.initialPosition.x = x;
+        }
+
+        if (y !== undefined) {
+            this.initialPosition.y = y;
+        }
+
+        this.bubbleSprite.setPosition(this.initialPosition.x, this.initialPosition.y);
+        this.objectSprite.setPosition(this.initialPosition.x, this.initialPosition.y);
     }
 }

@@ -32,12 +32,16 @@ export class Preloader extends Scene
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
 
+        this.load.audio('menu-sound', 'sounds/menu_sound.webm');
+        this.load.audio('nasales-sound', 'sounds/nasales_level_sound.webm');
+
         this.load.image('logo', 'logo.png');
+        this.load.image('bubble', 'object/bubble.png');
+        this.load.image('mesa', 'object/mesa.png');
+        this.load.image('cama', 'object/cama.png');
         this.load.image('star', 'star.png');
-        this.load.image('monkey', 'monkey.png');
-        this.load.image('bubble', 'bubble.png');
-        this.load.image('mesa', 'mesa.png');
-        this.load.image('cama', 'cama.png');
+        this.load.spritesheet('orangeButton', 'orange_buttons.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet('monkeys', 'character/Monkey-Assets.png', { frameWidth: 42, frameHeight: 36 });
     }
 
     create ()
