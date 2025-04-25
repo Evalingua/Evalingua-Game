@@ -39,6 +39,11 @@ export class Preloader extends Scene
         this.load.image('bubble', 'object/bubble.png');
         this.load.image('mesa', 'object/mesa.png');
         this.load.image('cama', 'object/cama.png');
+        this.load.image('mano', 'object/mano.png');
+        this.load.image('boton', 'object/boton.png');
+        this.load.image('nariz', 'object/nariz.png');
+        this.load.image('piña', 'object/piña.png');
+        this.load.image('araña', 'object/araña.png');
         this.load.image('star', 'star.png');
         this.load.spritesheet('orangeButton', 'orange_buttons.png', { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet('monkeys', 'character/Monkey-Assets.png', { frameWidth: 42, frameHeight: 36 });

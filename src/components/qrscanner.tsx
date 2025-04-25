@@ -1,6 +1,6 @@
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { useEffect, useState } from "react";
-import { Config } from "../types/config.type";
+import { Config, ConfigResponse } from "../types/config.type";
 import { jwtDecode } from "jwt-decode";
 import { EventBus } from "../game/EventBus";
 import { toast } from "react-toastify";
@@ -16,6 +16,14 @@ const QrScannerComponent = () => {
         setScan(JSON.parse(result[0].rawValue))
     }
   };
+
+  const handleDemoLevel = () => {
+    const settings: ConfigResponse[] = [
+      {segmento: "demo", fonemas: ["m", "n", "ñ"]}
+    ];
+
+    EventBus.emit('auth-success', { settings });
+  }
 
   useEffect(() => {
     const code = scan.idEvaluacion;
@@ -68,6 +76,13 @@ const QrScannerComponent = () => {
         <img src="/assets/logo.png" alt="Evalingua Logo" className="w-96 mb-10" />
         <p className="font-bold text-md md:text-2xl">Escanea el código QR que aparece</p>
         <p className="font-bold text-md md:text-2xl">en el sistema, para iniciar el juego</p>
+        <button 
+          className="bg-orange-600 p-2 rounded-xl text-xl font-bold mt-4
+           border-4 border-orange-900 border-solid
+           hover:bg-orange-700 hover:border-orange-800 transition duration-100 ease-in-out"
+           onClick={handleDemoLevel}>
+          Probar demo
+          </button>
       </div>
       <div className="w-96 h-96">
         <Scanner 

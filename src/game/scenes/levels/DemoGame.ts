@@ -1,22 +1,13 @@
-import { EventBus } from "../EventBus";
+import { EventBus } from "../../EventBus";
 import { Scene } from "phaser";
-import { Bubble, ObjectConfig } from "../objects/Bubble";
-import { LevelManager } from "../LevelManager";
-import { SpeechSynthesisService } from "../../services/SpeechSynthesisService";
-import { SpeechRecognitionService } from "../../services/SpeechRecognitionService";
-import { AudioStorageService } from "../../services/AudioStorageService";
-import AuthService from "../../services/AuthService";
+import { Bubble, ObjectConfig } from "../../objects/Bubble";
+import { SpeechSynthesisService } from "../../../services/SpeechSynthesisService";
+import { SpeechRecognitionService } from "../../../services/SpeechRecognitionService";
+import { Configuration, MapConfig } from "../../config/Configuration";
+import { LevelManager } from "../../LevelManager";
+import { BubbleScene } from "../../templates/BubbleScene";
 
-interface FonemaConfig {
-  words: { name: string, imageKey: string }[];
-  animal: {
-    key: string;
-    scale?: number;
-    animation: { key: string, frameRate: number, frames: { start: number, end: number }, repeat?: number, yoyo?: boolean }[];
-  };
-}
-
-export class NasalesGame extends Scene {
+export class DemoGame extends Scene implements BubbleScene{
     camera: Phaser.Cameras.Scene2D.Camera;
     background: Phaser.GameObjects.Image;
     gameText: Phaser.GameObjects.Text;
@@ -25,14 +16,12 @@ export class NasalesGame extends Scene {
     music: Phaser.Sound.BaseSound;
     protected segmento: string;
     protected fonemas: string[];
-    private evaluacionId: string;
-    private username: string;
     private bubbles: Bubble[] = [];
+    private levelManager: LevelManager;
     private recognition: SpeechRecognition;
     private activeTimeout: number | null = null;
     private selectedBubble: Bubble | null = null;
     private _isBubbleActive: boolean = false;
-    private levelManager: LevelManager;
     private currentFonema: string | null = null;
     private poppedBubbles: number = 0;
     private statusText: Phaser.GameObjects.Text;
@@ -45,73 +34,22 @@ export class NasalesGame extends Scene {
     private maxAttempts: number = 3;
     private attemptsText: Phaser.GameObjects.Text;
     private lastAudioBlob: Blob | null = null;
-    private audioToProcess: { filename: string, success: boolean } | null = null;
-    private fonemaConfig: Record<string, FonemaConfig> = {
-        "m": {
-            words: [
-                { name: "mesa", imageKey: "mesa" },
-                { name: "cama", imageKey: "cama" }
-            ],
-            animal: {
-                key: "monkeys",
-                scale: 10,
-                animation: [
-                    { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                    { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                    { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                    { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                ]
-            }
-        },
-        "n": {
-            words: [
-                { name: "botón", imageKey: "boton" },
-                { name: "mano", imageKey: "mano" },
-                { name: "nariz", imageKey: "nariz" }
-            ],
-            animal: {
-                key: "nutria",
-                animation: [
-                    { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                    { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                    { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                    { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                ]
-            }
-        },
-        "ñ": {
-            words: [
-                { name: "uña", imageKey: "uña" },
-                { name: "piña", imageKey: "piña" }
-            ],
-            animal: {
-                key: "ñu",
-                animation: [
-                    { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                    { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                    { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                    { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                ]
-            }
-        }
-    }
+    private audioToProcess: { filename: string, success: boolean, palabra: string, posicion: string } | null = null;
+    private levelConfiguration: MapConfig;
     
     constructor(segmento?: string, fonemas?: string[]) {
-        super(segmento || "Nasales");
-        this.segmento = segmento || "nasales";
+        super(segmento || "demo");
+        this.segmento = segmento || "demo";
         this.fonemas = fonemas || [];
-        this.levelManager = LevelManager.getInstance();
         this.synthesisService = SpeechSynthesisService.getInstance();
         this.recognitionService = SpeechRecognitionService.getInstance();
-        const auth = AuthService.getInstance();
-        this.evaluacionId = auth.getEvaluacionId();
-        this.username = auth.getUserName();
+        this.levelManager = LevelManager.getInstance();
+        this.levelConfiguration = Configuration["nasales"];
     }
 
     create() {
         console.log(`Cargando nivel para segmento ${this.segmento} con fonemas:`, this.fonemas);
         
-        // Obtener información actualizada del LevelManager
         const currentLevel = this.levelManager.getCurrentLevel();
         this.currentFonema = this.levelManager.getCurrentFonema();
         
@@ -119,12 +57,12 @@ export class NasalesGame extends Scene {
             console.error("No hay nivel o fonema actual disponible");
             return;
         }
-        
+
         // Configurar cámara y fondo
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
-        this.background = this.add.image(512, 384, "bg_jungle").setScale(1.6);
-        this.music = this.sound.add("nasales-sound", { loop: true, volume: 0.1 });
+        this.background = this.add.image(512, 384, this.levelConfiguration.levelConfig.bg_image).setScale(1.6);
+        this.music = this.sound.add(this.levelConfiguration.levelConfig.bg_music, { loop: true, volume: 0.1 });
         this.music.play();
         
         // Configurar interfaz de usuario
@@ -149,26 +87,22 @@ export class NasalesGame extends Scene {
             strokeThickness: 2
         }).setVisible(false);
         
-        // Configurar mono animado
         this.setupAnimalAnimations();
         this.animal.play("idle");
         
-        // Configurar reconocimiento de voz
         this.setupSpeechRecognitionHandlers();
         
-        // Crear burbujas basadas en el fonema actual
         this.createBubblesForCurrentFonema();
 
         this.time.delayedCall(200, () => {
             this.synthesisService.speak(`A reventar las burbujas, tocala para empezar`);
         }); 
         
-        // Notificar que la escena está lista
         EventBus.emit("current-scene-ready", this);
     }
 
     private setupAnimalAnimations(): void {
-        const fonemaConfig = this.fonemaConfig[this.currentFonema || "m"];
+        const fonemaConfig = this.levelConfiguration.fonemasConfig[this.currentFonema || "m"];
         if (!fonemaConfig) return;
 
         const { key, animation } = fonemaConfig.animal;
@@ -192,8 +126,7 @@ export class NasalesGame extends Scene {
         // Preparar la cola de burbujas
         this.bubbleQueue = this.getObjectsForFonema(this.currentFonema);
         this.currentBubbleIndex = -1;
-        
-        // Mostrar la primera burbuja
+
         this.showNextBubble();
     }
 
@@ -234,27 +167,17 @@ export class NasalesGame extends Scene {
     }
     
     private getObjectsForFonema(fonema: string | null): ObjectConfig[] {
-        
-        switch (fonema) {
-            case "m":
-                return [
-                    { name: "mesa", imageKey: "mesa" },
-                    { name: "cama", imageKey: "cama" }
-                ];
-            case "n":
-                return [
-                    { name: "botón", imageKey: "boton" },
-                    { name: "mano", imageKey: "mano" },
-                    { name: "nariz", imageKey: "nariz" }
-                ];
-            case "ñ":
-                return [
-                    { name: "uña", imageKey: "uña" },
-                    { name: "piña", imageKey: "piña" }
-                ];
-            default:
-                return [];
-        }
+        if (!fonema) return [];
+
+        const fonemaConfig = this.levelConfiguration.fonemasConfig[fonema];
+        console.log("FonemaConfig", fonemaConfig);
+        if (!fonemaConfig) return [];
+
+        return fonemaConfig.words.map(word => ({
+            name: word.name,
+            imageKey: word.imageKey,
+            posicionFonema: word.posicionFonema
+        }));
     }
     
     private setupSpeechRecognitionHandlers(): void {
@@ -272,9 +195,6 @@ export class NasalesGame extends Scene {
         this.recognitionService.onAudioAvailable((audioBlob: Blob) => {
             if (this.audioToProcess) {
                 this.lastAudioBlob = audioBlob;
-                const { filename } = this.audioToProcess;
-                //this.recognitionService.downloadAudio(filename);
-                AudioStorageService.uploadAudio(audioBlob, filename);
                 this.audioToProcess = null;
                 console.log("Audio descargado available");
             }
@@ -308,7 +228,6 @@ export class NasalesGame extends Scene {
         this.music.resume();
         
         if (this.currentAttempts >= this.maxAttempts) {
-            this.processAudio(false);
             this.statusText.setText("Continuemos con la siguiente")
             this.selectedBubble.pop();
             this.selectedBubble = null;
@@ -327,28 +246,6 @@ export class NasalesGame extends Scene {
                 this.synthesisService.speak("Un intento más");
             }
         }
-    }
-
-    private processAudio(success: boolean): void {
-        // En modo de desarrollo, simplemente descargamos el archivo
-        // En producción, aquí iría la lógica para enviar al servicio
-        const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false }).replace(/:/g, '-');
-        const fileName = `/${this.segmento}/${this.currentFonema}/${this.selectedBubble?.getName()}_${currentTime}.wav`;
-        
-        console.log(`Procesando audio: ${fileName}`);
-        // En este ejemplo solo descargamos el archivo
-        this.audioToProcess = { filename: fileName, success };
-
-        console.log(this.lastAudioBlob);
-
-        if(this.lastAudioBlob) {
-            this.recognitionService.downloadAudio(fileName);
-            this.audioToProcess = null;
-            console.log("Audio procesado y descargado");
-        }
-         
-        // Aquí iría el código para enviar el audio al servicio
-        // sendAudioToService(this.lastAudioBlob, fileName, success);
     }
 
     private resetAttempts(): void {
@@ -408,8 +305,6 @@ export class NasalesGame extends Scene {
             this.attemptsText.setVisible(false);
             this.animal.play("celebrate");
 
-            this.processAudio(true);
-
             this.selectedBubble.pop();
             this.selectedBubble = null;
             this._isBubbleActive = false
@@ -420,13 +315,11 @@ export class NasalesGame extends Scene {
         }
     }
     
-    // Método para ser llamado desde Bubble cuando se revienta una burbuja
     public onBubblePopped(bubble: Bubble): void {
         if (bubble.isPopped) {
             this.poppedBubbles++;
             this.music.resume();
             
-            // Esperar un momento y mostrar la siguiente burbuja
             this.time.delayedCall(800, () => {
                 this.showNextBubble();
             });
@@ -434,7 +327,6 @@ export class NasalesGame extends Scene {
     }
     
     private checkLevelProgression(): void {
-        // Esperar un momento para mostrar la celebración
         if (this.poppedBubbles >= this.bubbleQueue.length) {
             this.synthesisService.speak("¡Muy bien! Has reventado todas las burbujas");
             this.time.delayedCall(500, () => {
@@ -460,7 +352,6 @@ export class NasalesGame extends Scene {
         }
     }
     
-    // Exponer el estado de actividad de la burbuja para otras clases
     public isBubbleActive(): boolean {
         return this._isBubbleActive;
     }

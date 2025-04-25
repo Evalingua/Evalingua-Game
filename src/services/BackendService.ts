@@ -1,19 +1,17 @@
 import {AxiosResponse} from "axios";
 import { BaseResponse } from "../types/base.type";
-import { ConfigResponse } from "../types/config.type";
 import api from "../interceptors/axiosConfig";
+import { AudioRequest, AudioResponse, ResultadoRequest, ResultadoResponse } from "../types/backend.type";
 
-export class EvaluacionService {
-    
-    private readonly BASE_URL = '/evaluacion';
+export class BackendService {
 
-    async createResultado(paciente: number): Promise<BaseResponse<ConfigResponse[]>> {
-        const response: AxiosResponse<BaseResponse<ConfigResponse[]>> = await api.post(`${this.BASE_URL}/create`, paciente);
+    async createResultado(request: ResultadoRequest): Promise<BaseResponse<ResultadoResponse>> {
+        const response: AxiosResponse<BaseResponse<ResultadoResponse>> = await api.post(`resultado/create`, request);
         return response.data;
     }
 
-    async createAudio(urlAudio: string): Promise<BaseResponse<string>> {
-        const response: AxiosResponse<BaseResponse<string>> = await api.post(`${this.BASE_URL}/audio`, urlAudio);
+    async createAudio(request: AudioRequest): Promise<BaseResponse<AudioResponse>> {
+        const response: AxiosResponse<BaseResponse<AudioResponse>> = await api.post(`/audio/create`, request);
         return response.data;
     }
 }

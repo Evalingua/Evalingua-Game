@@ -31,8 +31,21 @@ function App() {
             setGameSettings(data.settings); // Guarda los settings del juego
         });
 
+        EventBus.on('game-over', () => {
+            // Opcional: destruye o reinicia tu juego Phaser
+            if (phaserRef.current) {
+                phaserRef.current.game?.destroy(true);
+                phaserRef.current.scene = null;
+                phaserRef.current.game = null;
+                phaserRef.current = null;
+            }
+            setLoading(true);
+            setGameSettings(null);
+        });
+
         return () => {
-            EventBus.off('auth-success'); // Limpia el listener al desmontar el componente
+            EventBus.off('auth-success');
+            EventBus.off('game-over');
         };
     }, []);
 

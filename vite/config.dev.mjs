@@ -5,8 +5,8 @@ import fs from 'fs'
 import path from 'path'
 
 
-const certPath = path.resolve(__dirname, '../certificates/localhost+2.pem')
-const keyPath = path.resolve(__dirname, '../certificates/localhost+2-key.pem')
+export const certPath = path.resolve(__dirname, '../certificates/localhost+2.pem')
+export const keyPath = path.resolve(__dirname, '../certificates/localhost+2-key.pem')
 
 // https://vitejs.dev/config/
 export default defineConfig({

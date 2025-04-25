@@ -1,9 +1,10 @@
 import { Scene } from "phaser";
-import { NasalesGame } from "../scenes/NasalesGame";
+import { BubbleScene } from "../templates/BubbleScene";
 
 export interface BubbleConfig {
     name: string;
     imageKey: string;
+    posicionFonema: string;
     x: number;
     y: number;
 }
@@ -11,6 +12,7 @@ export interface BubbleConfig {
 export interface ObjectConfig {
     name: string;
     imageKey: string;
+    posicionFonema: string;
 }
 
 export interface Position {
@@ -24,6 +26,7 @@ export class Bubble {
     private objectSprite: Phaser.GameObjects.Sprite;
     private readonly name: string;
     private readonly imageKey: string;
+    private readonly posicionFonema: string;
     private initialPosition: Position;
     private isSelected: boolean;
     private floatingTween: Phaser.Tweens.Tween | null = null;
@@ -33,6 +36,7 @@ export class Bubble {
         this.scene = scene;
         this.name = config.name;
         this.imageKey = config.imageKey;
+        this.posicionFonema = config.posicionFonema;
         this.isPopped = false;
         this.isSelected = false;
         this.initialPosition = { x: config.x, y: config.y };
@@ -43,11 +47,12 @@ export class Bubble {
 
     private create(x: number, y: number): void {
         this.objectSprite = this.scene.add.sprite(x, y, this.imageKey);
-        this.objectSprite.setScale(0.3);
+        this.objectSprite.setScale(0.6);
         this.objectSprite.setVisible(true);
 
         this.bubbleSprite = this.scene.add.sprite(x, y, "bubble");
-        this.bubbleSprite.setScale(0.8);
+        this.bubbleSprite.setScale(1.5);
+        this.bubbleSprite.setAlpha(0.6);
     }
 
     private setupInteraction(): void {
@@ -56,8 +61,8 @@ export class Bubble {
 
         const handleClick = () => {
             if (!this.isPopped && !this.isSelected) {
-                const nasalesScene = this.scene as NasalesGame;
-                if (!nasalesScene.isBubbleActive()) {
+                const gameScene = this.scene as BubbleScene;
+                if (!gameScene.isBubbleActive()) {
                     this.moveToCenter();
                 }
             }
@@ -88,7 +93,7 @@ export class Bubble {
 
     public moveToCenter(): void {
         this.isSelected = true;
-        const scene = this.scene as NasalesGame;
+        const scene = this.scene as BubbleScene;
         scene.onBubbleSelected(this);
 
         // Detener la animación de flotación actual
@@ -104,7 +109,7 @@ export class Bubble {
             targets: [this.objectSprite],
             x: centerX,
             y: centerY,
-            scale: 0.5,
+            scale: 0.8,
             duration: 500,
             ease: "Power2",
         });
@@ -113,7 +118,7 @@ export class Bubble {
             targets: [this.bubbleSprite],
             x: centerX,
             y: centerY,
-            scale: 1.5,
+            scale: 1.8,
             duration: 500,
             ease: "Power2"
         });
@@ -126,7 +131,7 @@ export class Bubble {
             targets: [this.objectSprite],
             x: this.initialPosition.x,
             y: this.initialPosition.y,
-            scale: 0.3,
+            scale: 0.6,
             duration: 500,
             ease: "Power2",
         });
@@ -136,7 +141,7 @@ export class Bubble {
             x: this.initialPosition.x,
             y: this.initialPosition.y,
             duration: 500,
-            scale: 0.8,
+            scale: 1.5,
             ease: "Power2",
             onComplete: () => {
                 this.addFloatingAnimation();
@@ -177,8 +182,8 @@ export class Bubble {
                     ease: "Power2",
                     onComplete: () => {
                         // Notificar a NasalesGame que se completó este objeto
-                        const nasalesScene = this.scene as NasalesGame;
-                        nasalesScene.onBubblePopped(this);
+                        const gameScene = this.scene as BubbleScene;
+                        gameScene.onBubblePopped(this);
                     }
                 });
             },
@@ -205,6 +210,14 @@ export class Bubble {
 
     public getName(): string {
         return this.name;
+    }
+
+    public getImageKey(): string {
+        return this.imageKey;
+    }
+
+    public getPosicionFonema(): string {
+        return this.posicionFonema;
     }
 
     public isActive(): boolean {

@@ -33,8 +33,6 @@ export class SpeechSynthesisService {
         voices.forEach(voice => {
             this.voiceMap.set(voice.name, voice);
         });
-
-        console.log("Voces disponibles:", this.getAvailableVoices());
         
         // Buscar específicamente una voz femenina en español
         const femaleVoice = voices.find(v => 
