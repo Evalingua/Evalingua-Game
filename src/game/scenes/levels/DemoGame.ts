@@ -132,6 +132,7 @@ export class DemoGame extends Scene implements BubbleScene{
 
     private showNextBubble(): void {
         this.currentBubbleIndex++;
+        this.animal.play("idle");
 
         this.resetAttempts();
         
@@ -206,7 +207,7 @@ export class DemoGame extends Scene implements BubbleScene{
             }
 
             this._isBubbleActive = false;
-            this.animal.play("idle");
+            //this.animal.play("idle");
             this.statusText.setText("Selecciona una burbuja con este fonema");
         });
 
@@ -303,7 +304,6 @@ export class DemoGame extends Scene implements BubbleScene{
         if (word.includes(this.selectedBubble.getName())) {
             this.statusText.setText("¡Correcto!");
             this.attemptsText.setVisible(false);
-            this.animal.play("celebrate");
 
             this.selectedBubble.pop();
             this.selectedBubble = null;
@@ -318,9 +318,11 @@ export class DemoGame extends Scene implements BubbleScene{
     public onBubblePopped(bubble: Bubble): void {
         if (bubble.isPopped) {
             this.poppedBubbles++;
+            this.animal.play("celebrate");
+
             this.music.resume();
             
-            this.time.delayedCall(800, () => {
+            this.time.delayedCall(1200, () => {
                 this.showNextBubble();
             });
         }
@@ -339,6 +341,7 @@ export class DemoGame extends Scene implements BubbleScene{
                         frameRate: 5,
                         repeat: -1
                     });
+                    this.animal.play("celebrate");
                     this.button.play("shine");
                     this.button.setInteractive();
                     this.button.on("pointerdown", () => {

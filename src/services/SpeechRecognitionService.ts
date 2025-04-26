@@ -55,7 +55,15 @@ export class SpeechRecognitionService {
         }
 
         try {
-            this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            this.audioStream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 300));
 
             this.startMediaRecording(this.audioStream);
 

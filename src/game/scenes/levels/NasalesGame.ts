@@ -184,6 +184,7 @@ export class NasalesGame extends Scene implements BubbleScene {
 
     private showNextBubble(): void {
         this.currentBubbleIndex++;
+        this.animal.play("idle");
 
         this.resetAttempts();
         
@@ -395,7 +396,6 @@ export class NasalesGame extends Scene implements BubbleScene {
         if (word.includes(this.selectedBubble.getName())) {
             this.statusText.setText("¡Correcto!");
             this.attemptsText.setVisible(false);
-            this.animal.play("celebrate");
 
             this.processAudio(true);
 
@@ -413,6 +413,7 @@ export class NasalesGame extends Scene implements BubbleScene {
         if (bubble.isPopped) {
             this.poppedBubbles++;
             this.music.resume();
+            this.animal.play("celebrate");
             
             this.time.delayedCall(800, () => {
                 this.showNextBubble();
@@ -434,6 +435,7 @@ export class NasalesGame extends Scene implements BubbleScene {
                         repeat: -1
                     });
                     this.button.play("shine");
+                    this.animal.play("celebrate");
                     this.button.setInteractive();
                     this.button.on("pointerdown", () => {
                         this.cleanup();
