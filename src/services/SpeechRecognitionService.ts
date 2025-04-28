@@ -45,6 +45,7 @@ export class SpeechRecognitionService {
     public static getInstance(): SpeechRecognitionService {
         if (!SpeechRecognitionService.instance) {
             SpeechRecognitionService.instance = new SpeechRecognitionService();
+            console.log('SpeechRecognitionService instance created');
         }
         return SpeechRecognitionService.instance;
     }
@@ -59,6 +60,7 @@ export class SpeechRecognitionService {
                 noiseSuppression: true,
                 autoGainControl: true
             }});
+            console.log('Audio stream obtained:', this.audioStream);
             await new Promise(res => setTimeout(res, 300));
             this.startMediaRecording(this.audioStream);
 
@@ -91,6 +93,7 @@ export class SpeechRecognitionService {
 
     private startMediaRecording(stream: MediaStream) {
         this.audioChunks = [];
+        console.log('Starting media recording...');
         this.mediaRecorder = new MediaRecorder(stream);
         this.mediaRecorder.ondataavailable = e => { if (e.data.size) this.audioChunks.push(e.data); };
         this.mediaRecorder.onstop = () => {
@@ -102,6 +105,7 @@ export class SpeechRecognitionService {
     }
 
     private stopMediaRecording() {
+        console.log('Stopping media recording...');
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
             this.mediaRecorder.stop();
         } else {
