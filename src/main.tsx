@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     </React.StrictMode>,
 );
 
-if ('serviceWorker' in navigator) {
+/* if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').then((registration) => {
             console.log('Service Worker registered with scope:', registration.scope);
@@ -22,4 +22,4 @@ if ('serviceWorker' in navigator) {
             console.error('Service Worker registration failed:', error);
         });
     });
-}
+} */

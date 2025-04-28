@@ -23,7 +23,7 @@ export class SpeechRecognitionService {
         if (hasNative) {
             const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
             this.nativeRecognition = new SR();
-            this.nativeRecognition!.continuous = true;
+            this.nativeRecognition!.continuous = false;
             this.nativeRecognition!.lang = 'es-ES';
             this.nativeRecognition!.interimResults = false;
 
@@ -67,12 +67,12 @@ export class SpeechRecognitionService {
             if (this.useReactLib) {
                 // Hook into react-speech-recognition
                 RSRecognition.startListening({
-                    continuous: true,
+                    continuous: false,
                     language: 'es-ES'
                 });
                 // Note: result & error handling via useSpeechRecognition hook in component
             } else if (this.nativeRecognition) {
-                //this.nativeRecognition.abort();
+                this.nativeRecognition.abort();
                 this.nativeRecognition.start();
             } else {
                 this.onErrorCallback('Speech recognition not supported');
