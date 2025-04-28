@@ -72,7 +72,7 @@ export class SpeechRecognitionService {
                 });
                 // Note: result & error handling via useSpeechRecognition hook in component
             } else if (this.nativeRecognition) {
-                this.nativeRecognition.abort();
+                //this.nativeRecognition.abort();
                 this.nativeRecognition.start();
             } else {
                 this.onErrorCallback('Speech recognition not supported');
