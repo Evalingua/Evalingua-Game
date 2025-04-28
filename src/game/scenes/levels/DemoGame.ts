@@ -191,6 +191,7 @@ export class DemoGame extends Scene implements BubbleScene{
 
         this.recognitionService.onResult((transcript: string) => {
             this.checkBubblePopByWord(transcript);
+            this.fonemaText.setText(`Dijiste: ${transcript}`);
         });
 
         this.recognitionService.onAudioAvailable((audioBlob: Blob) => {
