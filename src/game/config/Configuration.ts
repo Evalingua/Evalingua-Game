@@ -53,12 +53,13 @@ export const Configuration: ConfigStructure = {
                     { name: "nariz", imageKey: "nariz", posicionFonema: "inicial" }
                 ],
                 animal: {
-                    key: "nutria",
+                    key: "monkeys",
+                    scale: 10,
                     animation: [
                         { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        { key: "celebrate", frameRate: 5, frames: { start: 24, end: 27 }, repeat: -1 }
                     ]
                 }
             },
@@ -68,7 +69,8 @@ export const Configuration: ConfigStructure = {
                     { name: "piña", imageKey: "piña", posicionFonema: "medio" }
                 ],
                 animal: {
-                    key: "ñu",
+                    key: "monkeys",
+                    scale: 10,
                     animation: [
                         { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
@@ -91,7 +93,7 @@ export const Configuration: ConfigStructure = {
                     { name: "tapa", imageKey: "tapa", posicionFonema: "medio" },
                 ],
                 animal: {
-                    key: "pato",
+                    key: "monkeys",
                     animation: [
                         { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
@@ -106,7 +108,7 @@ export const Configuration: ConfigStructure = {
                     { name: "pato", imageKey: "pato", posicionFonema: "medio" },
                 ],
                 animal: {
-                    key: "tigre",
+                    key: "monkeys",
                     animation: [
                         { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
@@ -121,7 +123,7 @@ export const Configuration: ConfigStructure = {
                     { name: "boca", imageKey: "boca", posicionFonema: "medio" },
                 ],
                 animal: {
-                    key: "koala",
+                    key: "monkeys",
                     animation: [
                         { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },

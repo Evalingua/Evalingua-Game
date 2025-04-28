@@ -233,12 +233,12 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
     }
     
     private setupSpeechRecognitionHandlers(): void {
-        if (!this.recognitionService.getIsSupported()) {
+        /* if (!this.recognitionService.getIsSupported()) {
             console.error("El reconocimiento de voz no está soportado en este navegador");
             this.statusText.setText("Reconocimiento de voz no soportado");
             this.animal.play("idle");
             return;
-        }
+        } */
 
         this.recognitionService.onResult((transcript: string) => {
             this.checkBubblePopByWord(transcript);
