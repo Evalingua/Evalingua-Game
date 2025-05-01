@@ -1,158 +1,178 @@
-import RSRecognition from 'react-speech-recognition';
+import * as SpeechSDK from "microsoft-cognitiveservices-speech-sdk";
 
 export class SpeechRecognitionService {
-    private static instance: SpeechRecognitionService;
-    private nativeRecognition: SpeechRecognition | null = null;
-    private useReactLib: boolean;
+  private static instance: SpeechRecognitionService;
+  private recognizer: SpeechSDK.SpeechRecognizer | null = null;
+  private audioConfig: SpeechSDK.AudioConfig | null = null;
+  private audioStream: MediaStream | null = null;
+  private recognizing = false;
+  private audioChunks: BlobPart[] = [];
+  private mediaRecorder: MediaRecorder | null = null;
 
-    private mediaRecorder: MediaRecorder | null = null;
-    private audioChunks: BlobPart[] = [];
-    private audioStream: MediaStream | null = null;
+  // Callbacks
+  private onResultCallback: (text: string) => void = () => {};
+  private onErrorCallback: (err: string) => void = () => {};
+  private onEndCallback: () => void = () => {};
+  private onAudioAvailableCallback: (blob: Blob) => void = () => {};
 
-    // Callbacks
-    private onResultCallback: (transcript: string) => void = () => {};
-    private onEndCallback: () => void = () => {};
-    private onErrorCallback: (error: string) => void = () => {};
-    private onAudioAvailableCallback: (audioBlob: Blob) => void = () => {};
+  private constructor() {}
 
-    private constructor() {
-        const hasNative = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
-        const hasReact = typeof RSRecognition !== 'undefined';
-        this.useReactLib = !hasNative && hasReact;
+  public static getInstance(): SpeechRecognitionService {
+    if (!SpeechRecognitionService.instance) {
+      SpeechRecognitionService.instance = new SpeechRecognitionService();
+    }
+    return SpeechRecognitionService.instance;
+  }
 
-        if (hasNative) {
-            const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-            this.nativeRecognition = new SR();
-            this.nativeRecognition!.continuous = false;
-            this.nativeRecognition!.lang = 'es-ES';
-            this.nativeRecognition!.interimResults = false;
-
-            this.nativeRecognition!.onresult = (event: SpeechRecognitionEvent) => {
-                const transcript = event.results[0][0].transcript.toLowerCase();
-                this.onResultCallback(transcript);
-            };
-            this.nativeRecognition!.onend = () => {
-                this.stopMediaRecording();
-                this.onEndCallback();
-            };
-            this.nativeRecognition!.onerror = (event) => {
-                this.stopMediaRecording();
-                this.onErrorCallback(event.error);
-            };
+  public async startRecognition(): Promise<void> {
+    try {
+      if (this.recognizing) {
+        return;
+      }
+      
+      this.recognizing = true;
+      
+      // 1. Configurar micrófono
+      this.audioStream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      
+      // 2. Configurar grabación para guardar el audio
+      this.audioChunks = [];
+      const options = { mimeType: 'audio/webm' };
+      this.mediaRecorder = new MediaRecorder(this.audioStream, options);
+      this.mediaRecorder.start(500);
+      
+      this.mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          console.log(`Recibido chunk de audio: ${e.data.size} bytes`);
+          this.audioChunks.push(e.data);
         }
-    }
-
-    public static getInstance(): SpeechRecognitionService {
-        if (!SpeechRecognitionService.instance) {
-            SpeechRecognitionService.instance = new SpeechRecognitionService();
-            console.log('SpeechRecognitionService instance created');
-        }
-        return SpeechRecognitionService.instance;
-    }
-
-    /**
-     * Starts recognition either via react-speech-recognition or native API
-     */
-    public async startRecognition(): Promise<void> {
-        try {
-            this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-            }});
-            console.log('Audio stream obtained:', this.audioStream);
-            await new Promise(res => setTimeout(res, 300));
-            this.startMediaRecording(this.audioStream);
-
-            if (this.useReactLib) {
-                // Hook into react-speech-recognition
-                RSRecognition.startListening({
-                    continuous: false,
-                    language: 'es-ES'
-                });
-                // Note: result & error handling via useSpeechRecognition hook in component
-            } else if (this.nativeRecognition) {
-                this.nativeRecognition.abort();
-                this.nativeRecognition.start();
-            } else {
-                this.onErrorCallback('Speech recognition not supported');
-            }
-        } catch (err) {
-            this.onErrorCallback(`Error starting recognition: ${err}`);
-        }
-    }
-
-    public stopRecognition(): void {
-        if (this.useReactLib) {
-            RSRecognition.stopListening();
-            this.onEndCallback();
-        } else if (this.nativeRecognition) {
-            this.nativeRecognition.stop();
-        }
-    }
-
-    private startMediaRecording(stream: MediaStream) {
-        this.audioChunks = [];
-        console.log('Starting media recording...');
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.mediaRecorder.ondataavailable = e => { if (e.data.size) this.audioChunks.push(e.data); };
-        this.mediaRecorder.onstop = () => {
-            const blob = new Blob(this.audioChunks, { type: 'audio/wav' });
-            this.onAudioAvailableCallback(blob);
-            this.cleanupMediaResources();
-        };
-        this.mediaRecorder.start();
-    }
-
-    private stopMediaRecording() {
-        console.log('Stopping media recording...');
-        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-            this.mediaRecorder.stop();
+      };
+      
+      // 3. Configurar reconocimiento desde micrófono DIRECTAMENTE
+      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
+        import.meta.env.VITE_API_KEY_AZURE,
+        import.meta.env.VITE_API_LOCATION_AZURE        
+      );
+      
+      // Configuraciones importantes
+      speechConfig.speechRecognitionLanguage = "es-ES";
+      speechConfig.enableDictation(); // Mejor para reconocimiento continuo
+      speechConfig.enableAudioLogging(); // Para diagnóstico
+      speechConfig.outputFormat = SpeechSDK.OutputFormat.Detailed;
+      
+      // Usar micrófono directamente en lugar de stream
+      this.audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+      this.recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, this.audioConfig);
+      
+      // 4. Configurar eventos
+      this.recognizer.recognizing = (_s, e) => {
+        console.log(`Reconociendo en tiempo real: ${e.result.text}`);
+      };
+      
+      this.recognizer.recognized = (_s, e) => {
+        if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
+          const jsonResult = e.result.properties.getProperty(SpeechSDK.PropertyId.SpeechServiceResponse_JsonResult);
+          console.log("Respuesta detallada:", jsonResult);
+          
+          if (e.result.text && e.result.text.trim().length > 0) {
+            this.onResultCallback(e.result.text.toLowerCase().trim());
+          } else {
+            console.log("Texto vacío reconocido");
+          }
         } else {
-            this.cleanupMediaResources();
+          console.log("Reconocimiento con reason diferente:", SpeechSDK.ResultReason[e.result.reason]);
         }
-    }
-
-    private cleanupMediaResources() {
-        if (this.audioStream) {
-            this.audioStream.getTracks().forEach(t => t.stop());
-            this.audioStream = null;
-        }
-    }
-
-    public forceStop(): void {
+      };
+      
+      this.recognizer.canceled = (_s, e) => {
+        this.onErrorCallback(`Error: ${e.errorDetails}, Reason: ${SpeechSDK.CancellationReason[e.reason]}`);
         this.stopRecognition();
-        this.stopMediaRecording();
-        this.cleanupMediaResources();
+      };
+      
+      this.recognizer.sessionStarted = (_s, e) => {
+        console.log(`Sesión iniciada: ${e.sessionId}`);
+      };
+      
+      this.recognizer.sessionStopped = (_s, e) => {
+        console.log(`Sesión finalizada: ${e.sessionId}`);
+        this.onEndCallback();
+      };
+      
+      // 5. Iniciar reconocimiento
+      await new Promise<void>((resolve, reject) => {
+        this.recognizer?.startContinuousRecognitionAsync(
+          () => {
+            resolve();
+          },
+          (err) => {
+            reject(err);
+          }
+        );
+      });
+      
+    } catch (err: any) {
+      console.error("Error iniciando reconocimiento:", err);
+      this.onErrorCallback(err.message);
+      this.recognizing = false;
     }
+  }
 
-    public onResult(callback: (transcript: string) => void): void {
-        this.onResultCallback = callback;
-        if (this.useReactLib) {
-            // Components using useSpeechRecognition should forward transcripts
-        }
+  public async stopRecognition(): Promise<void> {
+    if (!this.recognizing) return;
+    
+    console.log("Deteniendo reconocimiento...");
+    this.recognizing = false;
+    
+    try {
+      // 1. Detener la grabación
+      if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
+        this.mediaRecorder.stop();
+        const blob = new Blob(this.audioChunks, { type: "audio/webm" });
+        this.onAudioAvailableCallback(blob);
+      }
+      
+      // 2. Detener el reconocimiento
+      if (this.recognizer) {
+        await new Promise<void>((resolve, reject) => {
+          this.recognizer?.stopContinuousRecognitionAsync(
+            () => {
+              resolve();
+            },
+            (error) => {
+              reject(error);
+            }
+          );
+        });
+      }
+    } catch (err) {
+      console.error("Error al detener:", err);
+    } finally {
+      // 3. Limpiar recursos
+      if (this.audioStream) {
+        this.audioStream.getTracks().forEach(track => track.stop());
+        this.audioStream = null;
+      }
+      
+      this.recognizer = null;
+      this.audioConfig = null;
+      this.mediaRecorder = null;
+      this.onEndCallback();
     }
-    public onEnd(callback: () => void): void { this.onEndCallback = callback; }
-    public onError(callback: (error: string) => void): void { this.onErrorCallback = callback; }
-    public onAudioAvailable(callback: (blob: Blob) => void): void { this.onAudioAvailableCallback = callback; }
+  }
 
-    public getIsSupported(): boolean {
-        return this.useReactLib || !!this.nativeRecognition;
-    }
+  public isRecognizing(): boolean {
+    return this.recognizing;
+  }
 
-    public getAudioUrl(): string | null {
-        if (!this.audioChunks.length) return null;
-        const blob = new Blob(this.audioChunks, { type: 'audio/wav' });
-        return URL.createObjectURL(blob);
-    }
-
-    public downloadAudio(filename = 'grabacion.wav'): boolean {
-        const url = this.getAudioUrl();
-        if (!url) return false;
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        link.click();
-        return true;
-    }
+  // Métodos para registrar callbacks
+  public onResult(cb: (text: string) => void) { this.onResultCallback = cb; }
+  public onError(cb: (err: string) => void) { this.onErrorCallback = cb; }
+  public onEnd(cb: () => void) { this.onEndCallback = cb; }
+  public onAudioAvailable(cb: (blob: Blob) => void) { this.onAudioAvailableCallback = cb; }
 }
