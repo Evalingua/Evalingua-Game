@@ -24,10 +24,14 @@ const StartGame = (parent: string, gameSettings: ConfigResponse[] | null) => {
 
     const config: Phaser.Types.Core.GameConfig = {
         type: AUTO,
-        width: 1024,
-        height: 768,
-        parent,
         backgroundColor: '#028af8',
+        scale: {
+            mode: Phaser.Scale.RESIZE,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+            parent: parent,
+            width: 1024,
+            height: 768
+        },
         scene: [
             ...baseScenes,
             ...dynamicScenes

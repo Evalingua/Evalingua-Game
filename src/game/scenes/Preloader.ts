@@ -37,16 +37,55 @@ export class Preloader extends Scene
 
         this.load.image('logo', 'logo.png');
         this.load.image('bubble', 'object/bubble.png');
-        this.load.image('mesa', 'object/mesa.png');
-        this.load.image('cama', 'object/cama.png');
-        this.load.image('mano', 'object/mano.png');
-        this.load.image('boton', 'object/boton.png');
-        this.load.image('nariz', 'object/nariz.png');
-        this.load.image('piña', 'object/piña.png');
+
         this.load.image('araña', 'object/araña.png');
-        this.load.image('star', 'star.png');
+        this.load.image('arete', 'object/arete.png');
+        this.load.image('bebe', 'object/bebe.png');
+        this.load.image('boca', 'object/boca.png');
+        this.load.image('boton', 'object/boton.png');
+        this.load.image('cafe', 'object/cafe.png');
+        this.load.image('cama', 'object/cama.png');
+        this.load.image('casa', 'object/casa.png');
+        this.load.image('chancho', 'object/chancho.png');
+        this.load.image('codo', 'object/codo.png');
+        this.load.image('collar', 'object/collar.png');
+        this.load.image('dedo', 'object/dedo.png');
+        this.load.image('falda', 'object/falda.png');
+        this.load.image('foco', 'object/foco.png');
+        this.load.image('gato', 'object/gato.png');
+        this.load.image('guantes', 'object/guantes.png');
+        this.load.image('huevo', 'object/huevo.png');
+        this.load.image('jabon', 'object/jabon.png');
+        this.load.image('jaula', 'object/jaula.png');
+        this.load.image('lapiz', 'object/lapiz.png');
+        this.load.image('leon', 'object/leon.png');
+        this.load.image('luna', 'object/luna.png');
+        this.load.image('mano', 'object/mano.png');
+        this.load.image('mesa', 'object/mesa.png');
+        this.load.image('nariz', 'object/nariz.png');
+        this.load.image('ojo', 'object/ojo.png');
+        this.load.image('pared', 'object/pared.png');
+        this.load.image('pato', 'object/pato.png');
+        this.load.image('payaso', 'object/payaso.png');
+        this.load.image('peine', 'object/peine.png');
+        this.load.image('pelota', 'object/pelota.png');
+        this.load.image('pie', 'object/pie.png');
+        this.load.image('piña', 'object/piña.png');
+        this.load.image('polo', 'object/polo.png');
+        this.load.image('raton', 'object/raton.png');
+        this.load.image('reloj', 'object/reloj.png');
+        this.load.image('soga', 'object/soga.png');
+        this.load.image('sol', 'object/sol.png');
+        this.load.image('tapa', 'object/tapa.png');
+        this.load.image('taza', 'object/taza.png');
+        this.load.image('torta', 'object/torta.png');
+        this.load.image('vaso', 'object/vaso.png');
+        this.load.image('vela', 'object/vela.png');
+        this.load.image('zapato', 'object/zapato.png');
+
         this.load.spritesheet('orangeButton', 'orange_buttons.png', { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet('monkeys', 'character/Monkey-Assets.png', { frameWidth: 42, frameHeight: 36 });
+        this.load.spritesheet('hand_pointer', 'character/Hand-Sprite.png', { frameWidth: 64, frameHeight: 64 });
         //this.load.spritesheet('nutria', 'character/sprite-nutria2.png', { frameWidth: 125, frameHeight: 167 });
     }
 

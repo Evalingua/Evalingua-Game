@@ -1,64 +1,73 @@
 import { EventBus } from "../../EventBus";
 import { Scene } from "phaser";
 import { Bubble, ObjectConfig } from "../../objects/Bubble";
+import { LevelManager } from "../../LevelManager";
 import { SpeechSynthesisService } from "../../../services/SpeechSynthesisService";
 import { SpeechRecognitionService } from "../../../services/SpeechRecognitionService";
+import { AudioStorageService } from "../../../services/AudioStorageService";
+import { BackendService } from "../../../services/BackendService";
+import { AudioRequest, ResultadoRequest, ResultadoResponse } from "../../../types/backend.type";
+import AuthService from "../../../services/AuthService";
+import { toast } from "react-toastify";
 import { Configuration, MapConfig } from "../../config/Configuration";
-import { LevelManager } from "../../LevelManager";
 import { BubbleScene } from "../../templates/BubbleScene";
 
-export class DemoGame extends Scene implements BubbleScene{
+export class AfricadasGame extends Scene implements BubbleScene {
     camera: Phaser.Cameras.Scene2D.Camera;
     background: Phaser.GameObjects.Image;
     gameText: Phaser.GameObjects.Text;
     animal: Phaser.GameObjects.Sprite;
     button: Phaser.GameObjects.Sprite;
-    handPointer: Phaser.GameObjects.Sprite;
     music: Phaser.Sound.BaseSound;
     protected segmento: string;
     protected fonemas: string[];
+    private evaluacionId: string;
+    private username: string;
     private bubbles: Bubble[] = [];
-    private levelManager: LevelManager;
     private recognition: SpeechRecognition;
     private activeTimeout: number | null = null;
     private selectedBubble: Bubble | null = null;
     private _isBubbleActive: boolean = false;
+    private levelManager: LevelManager;
     private currentFonema: string | null = null;
     private poppedBubbles: number = 0;
-    //private statusText: Phaser.GameObjects.Text;
-    //private fonemaText: Phaser.GameObjects.Text;
     private synthesisService: SpeechSynthesisService;
     private recognitionService: SpeechRecognitionService;
+    private backendService: BackendService;
+    private resultado: ResultadoResponse | null = null;
     private currentBubbleIndex: number = -1;
     private bubbleQueue: ObjectConfig[] = [];
     private currentAttempts: number = 0;
     private maxAttempts: number = 3;
-    //private attemptsText: Phaser.GameObjects.Text;
+    private lastAudioBlob: Blob | null = null;
     private audioToProcess: { filename: string, success: boolean, palabra: string, posicion: string } | null = null;
     private levelConfiguration: MapConfig;
 
-    // Responsivo
     private baseWidth  = 1024;
     private baseHeight = 768;
     private bubbleXRatio   = 312 / this.baseWidth;
     private bubbleYShow     = 384 / this.baseHeight;
-    //private bubbleYStart    = 800 / this.baseHeight;
     private animalXRatio   = 660 / this.baseWidth;
     private animalYRatio   = 400 / this.baseHeight;
     
     constructor(segmento?: string, fonemas?: string[]) {
-        super(segmento || "demo");
-        this.segmento = segmento || "demo";
+        super(segmento || "africadas");
+        this.segmento = segmento || "africadas";
         this.fonemas = fonemas || [];
+        this.levelManager = LevelManager.getInstance();
         this.synthesisService = SpeechSynthesisService.getInstance();
         this.recognitionService = SpeechRecognitionService.getInstance();
-        this.levelManager = LevelManager.getInstance();
-        this.levelConfiguration = Configuration["nasales"];
+        const auth = AuthService.getInstance();
+        this.evaluacionId = auth.getEvaluacionId();
+        this.username = auth.getUserName();
+        this.backendService = new BackendService();
+        this.levelConfiguration = Configuration[this.segmento];
     }
 
     create() {
         console.log(`Cargando nivel para segmento ${this.segmento} con fonemas:`, this.fonemas);
         
+        // Obtener información actualizada del LevelManager
         const currentLevel = this.levelManager.getCurrentLevel();
         this.currentFonema = this.levelManager.getCurrentFonema();
         
@@ -66,7 +75,7 @@ export class DemoGame extends Scene implements BubbleScene{
             console.error("No hay nivel o fonema actual disponible");
             return;
         }
-
+        
         // Configurar cámara y fondo
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
@@ -81,16 +90,6 @@ export class DemoGame extends Scene implements BubbleScene{
         
         this.createBubblesForCurrentFonema();
 
-        this.handPointer = this.add.sprite(0, 0, "hand_pointer").setScale(2).setOrigin(0).setDepth(100);
-        this.handPointer.setVisible(false);
-        this.anims.create({
-            key: "handPointerAnimation",
-            frames: this.anims.generateFrameNumbers("hand_pointer", { start: 0, end: 2 }),
-            frameRate: 5,
-            repeat: -1,
-            yoyo: true
-        });
-
         this.scale.on('resize', this.onResize, this);
         const { width, height } = this.scale.gameSize;
         this.onResize({ width, height });
@@ -98,67 +97,104 @@ export class DemoGame extends Scene implements BubbleScene{
         EventBus.emit("current-scene-ready", this);
     }
 
+    private async createNewAudio(filename: string, url: string, palabra: string, posicion: string): Promise<void> {
+        const audioRequest: AudioRequest = {
+            audioPath: filename,
+            audioUrl: url,
+            resultadoId: this.resultado?.id || 0,
+            palabra: palabra,
+            posicion: posicion
+        };
+        
+        this.backendService.createAudio(audioRequest).then((response) => {
+            console.log("Audio creado:", response);
+        }).catch((error) => {
+            console.error("Error creando audio:", error);
+        });
+    }
+
+    private async createNewResultado(): Promise<void> {
+        const resultadoRequest: ResultadoRequest = {
+            evaluacionId: this.evaluacionId,
+            fonema: this.currentFonema || "",
+            username: this.username,
+            totalResultados: this.bubbleQueue.length
+        };
+        this.backendService.createResultado(resultadoRequest).then((response) => {
+            console.log("Resultado creado:", response);
+            this.resultado = response.data;
+        }).catch((error) => {
+            console.error("Error creando resultado:", error);
+        });
+    }
+
     private setupAnimalAnimations(): void {
         const fonemaConfig = this.levelConfiguration.fonemasConfig[this.currentFonema || "m"];
         if (!fonemaConfig) return;
+
         const { key, animation } = fonemaConfig.animal;
-        this.animal = this.add.sprite(0, 0, key)
-        .setScale(fonemaConfig.animal.scale || 1);
+        this.animal = this.add.sprite(0, 0, key).setScale(fonemaConfig.animal.scale || 1);
         animation.forEach(anim => {
-        this.anims.create({
-            key: anim.key,
-            frames: this.anims.generateFrameNumbers(key, {
-            start: anim.frames.start,
-            end: anim.frames.end
-            }),
-            frameRate: anim.frameRate,
-            repeat: anim.repeat || 0,
-            yoyo: anim.yoyo || false
-        });
+            this.anims.create({
+                key: anim.key,
+                frames: this.anims.generateFrameNumbers(key, { start: anim.frames.start, end: anim.frames.end }),
+                frameRate: anim.frameRate,
+                repeat: anim.repeat || 0,
+                yoyo: anim.yoyo || false
+            });
         });
     }
     
     private createBubblesForCurrentFonema(): void {
-        this.bubbles.forEach(b => b.destroy());
+        this.bubbles.forEach(bubble => bubble.destroy());
         this.bubbles = [];
         this.bubbleQueue = this.getObjectsForFonema(this.currentFonema);
         this.currentBubbleIndex = -1;
-        this.showNextBubble();
+        this.createNewResultado().then(() => {
+            console.log("Resultado creado correctamente");
+            this.showNextBubble();
+        }
+        ).catch((error) => {
+            console.error("Error creando resultado:", error);
+            toast.error("Error creando resultado, por favor intenta de nuevo");
+        });
     }
 
     private showNextBubble(): void {
         this.currentBubbleIndex++;
         this.animal.play("idle");
+
         this.resetAttempts();
-
+        
         if (this.currentBubbleIndex < this.bubbleQueue.length) {
-        const objConfig = this.bubbleQueue[this.currentBubbleIndex];
-        const bubble = new Bubble(this, {
-            ...objConfig,
-            x: this.bubbleXRatio * this.scale.gameSize.width, 
-            y: this.bubbleYShow * this.scale.gameSize.height + 500
-        });
-        this.bubbles.push(bubble);
-
-        // Entrada animada
-        this.tweens.add({
-            targets: [bubble.getBubbleSprite(), bubble.getObjectSprite()],
-            y: this.bubbleYShow * this.scale.gameSize.height,
-            duration: 1000,
-            ease: 'Power1',
-            onComplete: () => {
-            bubble.setPosition(
-                this.bubbleXRatio * this.scale.gameSize.width,
-                this.bubbleYShow * this.scale.gameSize.height
-            );
-            this.synthesisService.speak('Mira, ¿qué es eso?');
-            this.handPointer.setVisible(true);
-            this.handPointer.play("handPointerAnimation");
-            bubble.addFloatingAnimation();
-            }
-        });
+            const objConfig = this.bubbleQueue[this.currentBubbleIndex];
+            const config = {
+                ...objConfig,
+                x: this.bubbleXRatio * this.scale.gameSize.width, 
+                y: this.bubbleYShow * this.scale.gameSize.height + 500  
+            };
+            
+            const bubble = new Bubble(this, config);
+            this.bubbles.push(bubble);
+            
+            // Animar la entrada de la burbuja
+            this.tweens.add({
+                targets: [bubble.getBubbleSprite(), bubble.getObjectSprite()],
+                y: this.bubbleYShow * this.scale.gameSize.height,
+                duration: 1000,
+                ease: 'Power1',
+                onComplete: () => {
+                    bubble.setPosition(
+                        this.bubbleXRatio * this.scale.gameSize.width,
+                        this.bubbleYShow * this.scale.gameSize.height
+                    );
+                    this.synthesisService.speak('Mira, ¿que es eso?');
+                    bubble.addFloatingAnimation();
+                }
+            });
         } else {
-        this.checkLevelProgression();
+            // No hay más burbujas, verificar si todas han sido reventadas
+            this.checkLevelProgression();
         }
     }
     
@@ -182,28 +218,19 @@ export class DemoGame extends Scene implements BubbleScene{
         const coverScale = Math.max(scaleX, scaleY);
         console.log("CoverScale", coverScale);
 
-        // Fondo
         this.background
-            .setDisplaySize(width, height)       // fuerza ancho = canvas width y alto = canvas height
-            .setPosition(0, 0);                  // origen al borde superior-izquierdo
-
-        // Si además quieres mantener el origen en 0,0:
+            .setDisplaySize(width, height)
+            .setPosition(0, 0);
         this.background.setOrigin(0);
 
-        // Animal
         this.animal
         .setPosition(width * this.animalXRatio, height * this.animalYRatio)
 
-        // Reposicionar burbujas existentes
         this.bubbles.forEach(bubble => {
         bubble.setPosition(
             width * this.bubbleXRatio,
             height * this.bubbleYShow
         );})
-
-        // Reposicionar handPointer
-        this.handPointer
-        .setPosition(width * this.bubbleXRatio, height * this.bubbleYShow);
     }
     
     private setupSpeechRecognitionHandlers(): void {
@@ -214,8 +241,21 @@ export class DemoGame extends Scene implements BubbleScene{
 
         this.recognitionService.onAudioAvailable((audioBlob: Blob) => {
             if (this.audioToProcess) {
+                this.lastAudioBlob = audioBlob;
+                const { filename, palabra, posicion } = this.audioToProcess;
+
+                AudioStorageService.uploadAudio(audioBlob, filename).then((response) => {
+                    console.log("Audio subido correctamente");
+                    this.createNewAudio(`evalingua/${filename}`, response, palabra, posicion).then(() => {
+                        console.log("Audio creado correctamente");
+                    }).catch((error) => {
+                        console.error("Error creando audio:", error);
+                    });
+                }).catch((error) => {
+                    console.error("Error al subir el audio:", error);
+                });
                 this.audioToProcess = null;
-                console.log("Audio descargado available", audioBlob);
+                console.log("Audio descargado available");
             }
         });
 
@@ -225,6 +265,7 @@ export class DemoGame extends Scene implements BubbleScene{
             }
 
             this._isBubbleActive = false;
+            this.animal.play("idle");
         });
 
         this.recognitionService.onError((error: string) => {
@@ -242,14 +283,11 @@ export class DemoGame extends Scene implements BubbleScene{
 
         this.currentAttempts++;
         this.music.resume();
-        this.handPointer.setVisible(true);
-        this.handPointer.play("handPointerAnimation");
         
         if (this.currentAttempts >= this.maxAttempts) {
+            this.processAudio(false);
             this.selectedBubble.pop();
             this.selectedBubble = null;
-            this.handPointer.setVisible(false);
-            this.handPointer.stop();
 
             this.synthesisService.speak("Vamos a la siguiente");
         } else {
@@ -259,8 +297,37 @@ export class DemoGame extends Scene implements BubbleScene{
         }
     }
 
+    private processAudio(success: boolean): void {
+        const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false }).replace(/:/g, '-');
+        const fileName = `${this.evaluacionId}/${this.segmento}/${this.currentFonema}/${this.selectedBubble?.getName()}_${currentTime}.wav`;
+        
+        console.log(`Procesando audio: ${fileName}`);
+        this.audioToProcess = { 
+            filename: fileName, 
+            success,
+            palabra: this.selectedBubble?.getName() || "",
+            posicion: this.selectedBubble?.getPosicionFonema() || ""
+        };
+        console.log(this.lastAudioBlob);
+
+        if(this.lastAudioBlob) {
+            console.log("Audio procesado y descargado");
+            AudioStorageService.uploadAudio(this.lastAudioBlob, fileName).then((response) => {
+                console.log("Audio subido correctamente");
+                this.createNewAudio(`evalingua/${fileName}`, response, this.audioToProcess?.palabra || "", this.audioToProcess?.posicion || "").then(() => {
+                    console.log("Audio creado correctamente");
+                }).catch((error) => {
+                    console.error("Error creando audio:", error);
+                });
+            }).catch((error) => {
+                console.error("Error al subir el audio:", error);
+            });
+        }
+    }
+
     private resetAttempts(): void {
         this.currentAttempts = 0;
+        this.lastAudioBlob = null;
         this.audioToProcess = null;
     }
 
@@ -275,8 +342,6 @@ export class DemoGame extends Scene implements BubbleScene{
         }
 
         this.selectedBubble = bubble;
-        this.handPointer.setVisible(false);
-        this.handPointer.stop();
         
         this.animal.play("stand");
         this.animal.once('animationcomplete-stand', () => {
@@ -304,16 +369,13 @@ export class DemoGame extends Scene implements BubbleScene{
         if (!this.selectedBubble) return;
         
         if (word.includes(this.selectedBubble.getName())) {
+            this.processAudio(true);
+
             this.selectedBubble.pop();
             this.selectedBubble = null;
             this._isBubbleActive = false
-            this.recognitionService.stopRecognition();
-            this.handPointer.setVisible(false);
-            this.handPointer.stop();
             
-            this.time.delayedCall(2000, () => {
-                this.synthesisService.speak("Muy bien!");
-            });
+            this.synthesisService.speak("Muy bien!");
         } else {
             this.handleFailedAttempt();
         }
@@ -322,11 +384,10 @@ export class DemoGame extends Scene implements BubbleScene{
     public onBubblePopped(bubble: Bubble): void {
         if (bubble.isPopped) {
             this.poppedBubbles++;
-            this.animal.play("celebrate");
-
             this.music.resume();
+            this.animal.play("celebrate");
             
-            this.time.delayedCall(1200, () => {
+            this.time.delayedCall(800, () => {
                 this.showNextBubble();
             });
         }
@@ -334,19 +395,19 @@ export class DemoGame extends Scene implements BubbleScene{
     
     private checkLevelProgression(): void {
         if (this.poppedBubbles >= this.bubbleQueue.length) {
-            this.synthesisService.speak("¡Muy bien! Has reventado todas las burbujas");
+            this.synthesisService.speak("¡Muy bien! reventaste todas las burbujas");
             this.time.delayedCall(500, () => {
                 const hasNextFonema = this.levelManager.goToNextFonema();
                 if (hasNextFonema) {
-                    this.button = this.add.sprite(this.bubbleXRatio * this.scale.gameSize.width, this.bubbleYShow * this.scale.gameSize.height, 'orangeButton').setScale(8);
+                    this.button = this.add.sprite(900, 384, 'orangeButton').setScale(3);
                     this.anims.create({
                         key: "shine",
                         frames: this.anims.generateFrameNumbers("orangeButton", { start: 90, end: 92 }),
                         frameRate: 5,
                         repeat: -1
                     });
-                    this.animal.play("celebrate");
                     this.button.play("shine");
+                    this.animal.play("celebrate");
                     this.button.setInteractive();
                     this.button.on("pointerdown", () => {
                         this.cleanup();

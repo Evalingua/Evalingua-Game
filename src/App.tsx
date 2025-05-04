@@ -15,14 +15,14 @@ function App() {
         }
     };
 
-    const launchFullScreen = (element: HTMLElement) => {
+    /* const launchFullScreen = (element: HTMLElement) => {
         
         return () => {
             if (element.requestFullscreen) {
                 element.requestFullscreen();
             }
         };
-    }
+    } */
 
     useEffect(() => {
         // Escucha el evento 'auth-success' emitido por QrScannerComponent
@@ -60,7 +60,7 @@ function App() {
     return (
         <div id="app">
             <PhaserGame ref={phaserRef} currentActiveScene={currentScene} gameSettings={gameSettings}/>
-            <button onClick={launchFullScreen(document.documentElement)}>Max</button>
+            {/* <button onClick={launchFullScreen(document.documentElement)}>Max</button> */}
         </div>
     );
 }

@@ -1,12 +1,12 @@
 import { ObjectConfig } from "../objects/Bubble";
 
 export interface FonemaConfig {
-  words: ObjectConfig[];
-  animal: {
-    key: string;
-    scale?: number;
-    animation: { key: string, frameRate: number, frames: { start: number, end: number }, repeat?: number, yoyo?: boolean }[];
-  };
+    words: ObjectConfig[];
+    animal: {
+        key: string;
+        scale?: number;
+        animation: { key: string, frameRate: number, frames: { start: number, end: number }, repeat?: number, yoyo?: boolean }[];
+    };
 }
 
 export interface MapConfig {
@@ -39,7 +39,7 @@ export const Configuration: ConfigStructure = {
                     key: "monkeys",
                     scale: 10,
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 5, frames: { start: 24, end: 27 }, repeat: -1 }
@@ -56,7 +56,7 @@ export const Configuration: ConfigStructure = {
                     key: "monkeys",
                     scale: 10,
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 5, frames: { start: 24, end: 27 }, repeat: -1 }
@@ -72,7 +72,7 @@ export const Configuration: ConfigStructure = {
                     key: "monkeys",
                     scale: 10,
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -95,7 +95,7 @@ export const Configuration: ConfigStructure = {
                 animal: {
                     key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -110,7 +110,7 @@ export const Configuration: ConfigStructure = {
                 animal: {
                     key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -125,7 +125,7 @@ export const Configuration: ConfigStructure = {
                 animal: {
                     key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -146,9 +146,9 @@ export const Configuration: ConfigStructure = {
                     { name: "bebé", imageKey: "bebe", posicionFonema: "medio" },
                 ],
                 animal: {
-                    key: "burro",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -162,9 +162,9 @@ export const Configuration: ConfigStructure = {
                     { name: "codo", imageKey: "codo", posicionFonema: "final" },
                 ],
                 animal: {
-                    key: "delfin",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -177,9 +177,9 @@ export const Configuration: ConfigStructure = {
                     { name: "soga", imageKey: "soga", posicionFonema: "medio" }
                 ],
                 animal: {
-                    key: "grulla",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -202,9 +202,9 @@ export const Configuration: ConfigStructure = {
                     { name: "falda", imageKey: "falda", posicionFonema: "final" }
                 ],
                 animal: {
-                    key: "lobo",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -217,9 +217,9 @@ export const Configuration: ConfigStructure = {
                     { name: "payaso", imageKey: "payaso", posicionFonema: "medio" },
                 ],
                 animal: {
-                    key: "llama",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -240,9 +240,9 @@ export const Configuration: ConfigStructure = {
                     { name: "café", imageKey: "cafe", posicionFonema: "medio" },
                 ],
                 animal: {
-                    key: "flamenco",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -256,9 +256,9 @@ export const Configuration: ConfigStructure = {
                     { name: "lápiz", imageKey: "lapiz", posicionFonema: "final" },
                 ],
                 animal: {
-                    key: "serpiente",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -272,9 +272,9 @@ export const Configuration: ConfigStructure = {
                     { name: "reloj", imageKey: "reloj", posicionFonema: "final" },
                 ],
                 animal: {
-                    key: "jirafa",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -294,9 +294,9 @@ export const Configuration: ConfigStructure = {
                     { name: "chancho", imageKey: "chancho", posicionFonema: "inicial" }
                 ],
                 animal: {
-                    key: "chivo",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -313,14 +313,14 @@ export const Configuration: ConfigStructure = {
         fonemasConfig: {
             "r": {
                 words: [
-                    { name: "arete", imageKey: "arete", posicionFonema: "inicial"},
+                    { name: "arete", imageKey: "arete", posicionFonema: "inicial" },
                     { name: "torta", imageKey: "torta", posicionFonema: "medio" },
                     { name: "collar", imageKey: "collar", posicionFonema: "final" }
                 ],
                 animal: {
-                    key: "raton",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -341,9 +341,9 @@ export const Configuration: ConfigStructure = {
                     { name: "perro", imageKey: "perro", posicionFonema: "medio" }
                 ],
                 animal: {
-                    key: "perro",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -352,190 +352,190 @@ export const Configuration: ConfigStructure = {
             }
         }
     },
-    "grupos_consonanticos_laterales": {
-        levelConfig: {
-            bg_image: "bg_jungle",
-            bg_music: "nasales-sound"
+    /*     "grupos_consonanticos_laterales": {
+            levelConfig: {
+                bg_image: "bg_jungle",
+                bg_music: "nasales-sound"
+            },
+            fonemasConfig: {
+                "bl": {
+                    words: [
+                        { name: "blusa", imageKey: "blusa", posicionFonema: "inicial" }
+                    ],
+                    animal: {
+                        key: "oso",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "pl": {
+                    words: [
+                        { name: "plato", imageKey: "plato", posicionFonema: "inicial" }
+                    ],
+                    animal: {
+                        key: "puma",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "fl": {
+                    words: [
+                        { name: "flor", imageKey: "flor", posicionFonema: "inicial" }
+                    ],
+                    animal: {
+                        key: "oso",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "cl": {
+                    words: [
+                        { name: "clavo", imageKey: "clavo", posicionFonema: "inicial" }
+                    ],
+                    animal: {
+                        key: "cocodrilo",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "gl": {
+                    words: [
+                        { name: "globo", imageKey: "globo", posicionFonema: "inicial" }
+                    ],
+                    animal: {
+                        key: "gorila",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                }
+            }
         },
-        fonemasConfig: {
-            "bl": {
-                words: [
-                    { name: "blusa", imageKey: "blusa", posicionFonema: "inicial" }
-                ],
-                animal: {
-                    key: "oso",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
+        "grupos_consonanticos_centrales": {
+            levelConfig: {
+                bg_image: "bg_jungle",
+                bg_music: "nasales-sound"
             },
-            "pl": {
-                words: [
-                    { name: "plato", imageKey: "plato", posicionFonema: "inicial" }
-                ],
-                animal: {
-                    key: "puma",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "fl": {
-                words: [
-                    { name: "flor", imageKey: "flor", posicionFonema: "inicial" }
-                ],
-                animal: {
-                    key: "oso",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "cl": {
-                words: [
-                    { name: "clavo", imageKey: "clavo", posicionFonema: "inicial" }
-                ],
-                animal: {
-                    key: "cocodrilo",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "gl": {
-                words: [
-                    { name: "globo", imageKey: "globo", posicionFonema: "inicial" }
-                ],
-                animal: {
-                    key: "gorila",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
+            fonemasConfig: {
+                "br": {
+                    words: [
+                        { name: "libro", imageKey: "libro", posicionFonema: "medio" },
+                    ],
+                    animal: {
+                        key: "burro",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "pr": {
+                    words: [
+                        { name: "princesa", imageKey: "princesa", posicionFonema: "inicial" },
+                    ],
+                    animal: {
+                        key: "puma",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "fr": {
+                    words: [
+                        { name: "fresa", imageKey: "fresa", posicionFonema: "inicial" },
+                    ],
+                    animal: {
+                        key: "flamenco",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "cr": {
+                    words: [
+                        { name: "cruz", imageKey: "cruz", posicionFonema: "inicial" },
+                    ],
+                    animal: {
+                        key: "cocodrilo",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "gr": {
+                    words: [
+                        { name: "tigre", imageKey: "tigre", posicionFonema: "inicial" }
+                    ],
+                    animal: {
+                        key: "gato",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "tr": {
+                    words: [
+                        { name: "tren", imageKey: "tren", posicionFonema: "inicial" },
+                    ],
+                    animal: {
+                        key: "tigre",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
+                },
+                "dr": {
+                    words: [
+                        { name: "cocodrilo", imageKey: "cocodrilo", posicionFonema: "inicial" },
+                    ],
+                    animal: {
+                        key: "cocodrilo",
+                        animation: [
+                            { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                            { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
+                            { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
+                            { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
+                        ]
+                    }
                 }
             }
-        }
-    },
-    "grupos_consonanticos_centrales": {
-        levelConfig: {
-            bg_image: "bg_jungle",
-            bg_music: "nasales-sound"
-        },
-        fonemasConfig: {
-            "br": {
-                words: [
-                    { name: "libro", imageKey: "libro", posicionFonema: "medio" },
-                ],
-                animal: {
-                    key: "burro",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "pr": {
-                words: [
-                    { name: "princesa", imageKey: "princesa", posicionFonema: "inicial" },
-                ],
-                animal: {
-                    key: "puma",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "fr": {
-                words: [
-                    { name: "fresa", imageKey: "fresa", posicionFonema: "inicial" },
-                ],
-                animal: {
-                    key: "flamenco",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "cr": {
-                words: [
-                    { name: "cruz", imageKey: "cruz", posicionFonema: "inicial" },
-                ],
-                animal: {
-                    key: "cocodrilo",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "gr": {
-                words: [
-                    { name: "tigre", imageKey: "tigre", posicionFonema: "inicial" }
-                ],
-                animal: {
-                    key: "gato",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "tr": {
-                words: [
-                    { name: "tren", imageKey: "tren", posicionFonema: "inicial" },
-                ],
-                animal: {
-                    key: "tigre",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            },
-            "dr": {
-                words: [
-                    { name: "cocodrilo", imageKey: "cocodrilo", posicionFonema: "inicial" },
-                ],
-                animal: {
-                    key: "cocodrilo",
-                    animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
-                        { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
-                        { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
-                    ]
-                }
-            }
-        }
-    },
+        }, */
     "diptongos": {
         levelConfig: {
             bg_image: "bg_jungle",
@@ -547,9 +547,9 @@ export const Configuration: ConfigStructure = {
                     { name: "guantes", imageKey: "guantes", posicionFonema: "inicial" }
                 ],
                 animal: {
-                    key: "gato",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -561,9 +561,9 @@ export const Configuration: ConfigStructure = {
                     { name: "huevo", imageKey: "huevo", posicionFonema: "inicial" }
                 ],
                 animal: {
-                    key: "pato",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -575,9 +575,9 @@ export const Configuration: ConfigStructure = {
                     { name: "pie", imageKey: "pie", posicionFonema: "inicial" },
                 ],
                 animal: {
-                    key: "puma",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -589,9 +589,9 @@ export const Configuration: ConfigStructure = {
                     { name: "jaula", imageKey: "jaula", posicionFonema: "inicial" },
                 ],
                 animal: {
-                    key: "gato",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -603,9 +603,9 @@ export const Configuration: ConfigStructure = {
                     { name: "peine", imageKey: "peine", posicionFonema: "inicial" },
                 ],
                 animal: {
-                    key: "puma",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
@@ -617,9 +617,9 @@ export const Configuration: ConfigStructure = {
                     { name: "león", imageKey: "leon", posicionFonema: "inicial" },
                 ],
                 animal: {
-                    key: "leon",
+                    key: "monkeys",
                     animation: [
-                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1},
+                        { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
                         { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }

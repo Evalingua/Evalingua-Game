@@ -9,7 +9,7 @@ export class SpeechSynthesisService {
     private constructor() {
         this.synth = new SpeechSynthesisUtterance();
         this.synth.lang = "es-ES";
-        this.synth.rate = 1.6; // Velocidad ligeramente más lenta que la normal
+        this.synth.rate = 1.4; // Velocidad ligeramente más lenta que la normal
         this.synth.pitch = 10.0; // Tono más alto
         this.synth.volume = 1.0;
         

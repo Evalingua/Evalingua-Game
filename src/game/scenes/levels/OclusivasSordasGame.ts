@@ -31,8 +31,6 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
     private levelManager: LevelManager;
     private currentFonema: string | null = null;
     private poppedBubbles: number = 0;
-    private statusText: Phaser.GameObjects.Text;
-    private fonemaText: Phaser.GameObjects.Text;
     private synthesisService: SpeechSynthesisService;
     private recognitionService: SpeechRecognitionService;
     private backendService: BackendService;
@@ -41,14 +39,20 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
     private bubbleQueue: ObjectConfig[] = [];
     private currentAttempts: number = 0;
     private maxAttempts: number = 3;
-    private attemptsText: Phaser.GameObjects.Text;
     private lastAudioBlob: Blob | null = null;
     private audioToProcess: { filename: string, success: boolean, palabra: string, posicion: string } | null = null;
     private levelConfiguration: MapConfig;
+
+    private baseWidth  = 1024;
+    private baseHeight = 768;
+    private bubbleXRatio   = 312 / this.baseWidth;
+    private bubbleYShow     = 384 / this.baseHeight;
+    private animalXRatio   = 660 / this.baseWidth;
+    private animalYRatio   = 400 / this.baseHeight;
     
     constructor(segmento?: string, fonemas?: string[]) {
-        super(segmento || "nasales");
-        this.segmento = segmento || "nasales";
+        super(segmento || "oclusivas_sordas");
+        this.segmento = segmento || "oclusivas_sordas";
         this.fonemas = fonemas || [];
         this.levelManager = LevelManager.getInstance();
         this.synthesisService = SpeechSynthesisService.getInstance();
@@ -75,31 +79,9 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
         // Configurar cámara y fondo
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
-        this.background = this.add.image(512, 384, this.levelConfiguration.levelConfig.bg_image).setScale(1.6);
+        this.background = this.add.image(0, 0, this.levelConfiguration.levelConfig.bg_image).setOrigin(0).setScale(1);
         this.music = this.sound.add(this.levelConfiguration.levelConfig.bg_music, { loop: true, volume: 0.1 });
         this.music.play();
-        
-        // Configurar interfaz de usuario
-        this.fonemaText = this.add.text(20, 20, `Fonema actual: ${this.currentFonema}`, {
-            fontSize: '24px',
-            color: '#FFFFFF',
-            stroke: '#000000',
-            strokeThickness: 3
-        });
-        
-        this.statusText = this.add.text(20, 60, "Selecciona una burbuja con este fonema", {
-            fontSize: '20px',
-            color: '#FFFFFF',
-            stroke: '#000000',
-            strokeThickness: 2
-        });
-
-        this.attemptsText = this.add.text(20, 100, "", {
-            fontSize: '18px',
-            color: '#FFFFFF',
-            stroke: '#000000',
-            strokeThickness: 2
-        }).setVisible(false);
         
         this.setupAnimalAnimations();
         this.animal.play("idle");
@@ -108,9 +90,9 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
         
         this.createBubblesForCurrentFonema();
 
-        this.time.delayedCall(200, () => {
-            this.synthesisService.speak(`A reventar las burbujas, tocala para empezar`);
-        }); 
+        this.scale.on('resize', this.onResize, this);
+        const { width, height } = this.scale.gameSize;
+        this.onResize({ width, height });
         
         EventBus.emit("current-scene-ready", this);
     }
@@ -151,7 +133,7 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
         if (!fonemaConfig) return;
 
         const { key, animation } = fonemaConfig.animal;
-        this.animal = this.add.sprite(660, 400, key).setScale(fonemaConfig.animal.scale || 1);
+        this.animal = this.add.sprite(0, 0, key).setScale(fonemaConfig.animal.scale || 1);
         animation.forEach(anim => {
             this.anims.create({
                 key: anim.key,
@@ -164,14 +146,10 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
     }
     
     private createBubblesForCurrentFonema(): void {
-        // Limpiar burbujas existentes
         this.bubbles.forEach(bubble => bubble.destroy());
         this.bubbles = [];
-        
-        // Preparar la cola de burbujas
         this.bubbleQueue = this.getObjectsForFonema(this.currentFonema);
         this.currentBubbleIndex = -1;
-
         this.createNewResultado().then(() => {
             console.log("Resultado creado correctamente");
             this.showNextBubble();
@@ -179,7 +157,7 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
         ).catch((error) => {
             console.error("Error creando resultado:", error);
             toast.error("Error creando resultado, por favor intenta de nuevo");
-        });        
+        });
     }
 
     private showNextBubble(): void {
@@ -188,13 +166,12 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
 
         this.resetAttempts();
         
-        // Verificar si hay más burbujas para mostrar
         if (this.currentBubbleIndex < this.bubbleQueue.length) {
             const objConfig = this.bubbleQueue[this.currentBubbleIndex];
             const config = {
                 ...objConfig,
-                x: 312, // Centrado horizontalmente
-                y: 800  // Posición inicial fuera de la pantalla (inferior)
+                x: this.bubbleXRatio * this.scale.gameSize.width, 
+                y: this.bubbleYShow * this.scale.gameSize.height + 500  
             };
             
             const bubble = new Bubble(this, config);
@@ -203,13 +180,15 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
             // Animar la entrada de la burbuja
             this.tweens.add({
                 targets: [bubble.getBubbleSprite(), bubble.getObjectSprite()],
-                y: 384,
+                y: this.bubbleYShow * this.scale.gameSize.height,
                 duration: 1000,
                 ease: 'Power1',
                 onComplete: () => {
-                    bubble.setPosition(312, 384);
-                    // Iniciar la animación de flotado una vez posicionada
-                    this.synthesisService.speak('¿Como se llama esto?');
+                    bubble.setPosition(
+                        this.bubbleXRatio * this.scale.gameSize.width,
+                        this.bubbleYShow * this.scale.gameSize.height
+                    );
+                    this.synthesisService.speak('Mira, ¿que es eso?');
                     bubble.addFloatingAnimation();
                 }
             });
@@ -231,14 +210,30 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
             posicionFonema: word.posicionFonema
         }));
     }
+
+    private onResize(gameSize: { width: number; height: number }) {
+        const { width, height } = gameSize;
+        const scaleX = width  / this.baseWidth;
+        const scaleY = height / this.baseHeight;
+        const coverScale = Math.max(scaleX, scaleY);
+        console.log("CoverScale", coverScale);
+
+        this.background
+            .setDisplaySize(width, height)
+            .setPosition(0, 0);
+        this.background.setOrigin(0);
+
+        this.animal
+        .setPosition(width * this.animalXRatio, height * this.animalYRatio)
+
+        this.bubbles.forEach(bubble => {
+        bubble.setPosition(
+            width * this.bubbleXRatio,
+            height * this.bubbleYShow
+        );})
+    }
     
     private setupSpeechRecognitionHandlers(): void {
-        /* if (!this.recognitionService.getIsSupported()) {
-            console.error("El reconocimiento de voz no está soportado en este navegador");
-            this.statusText.setText("Reconocimiento de voz no soportado");
-            this.animal.play("idle");
-            return;
-        } */
 
         this.recognitionService.onResult((transcript: string) => {
             this.checkBubblePopByWord(transcript);
@@ -270,7 +265,7 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
             }
 
             this._isBubbleActive = false;
-            this.statusText.setText("Selecciona una burbuja con este fonema");
+            this.animal.play("idle");
         });
 
         this.recognitionService.onError((error: string) => {
@@ -280,7 +275,6 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
             }
             this._isBubbleActive = false;
             this.animal.play("idle");
-            this.statusText.setText("Error en reconocimiento de voz");
         })
     }
 
@@ -292,23 +286,14 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
         
         if (this.currentAttempts >= this.maxAttempts) {
             this.processAudio(false);
-            this.statusText.setText("Continuemos con la siguiente")
             this.selectedBubble.pop();
             this.selectedBubble = null;
 
             this.synthesisService.speak("Vamos a la siguiente");
         } else {
-            const intentosRestantes = this.maxAttempts - this.currentAttempts;
-            this.statusText.setText(`Inténtalo de nuevo, te quedan ${intentosRestantes} intentos`);
-            this.attemptsText.setText(`Intentos restantes: ${intentosRestantes}`).setVisible(true);
+            this.synthesisService.speak(`Se llama ${this.selectedBubble!.getName()}, repite`);
             this.selectedBubble.returnToPosition();
             this.selectedBubble = null;
-
-            if(this.currentAttempts === 1) { 
-                this.synthesisService.speak("Vamos, tu puedes");
-            } else {
-                this.synthesisService.speak("Un intento más");
-            }
         }
     }
 
@@ -342,7 +327,6 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
 
     private resetAttempts(): void {
         this.currentAttempts = 0;
-        this.attemptsText.setVisible(false);
         this.lastAudioBlob = null;
         this.audioToProcess = null;
     }
@@ -358,15 +342,6 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
         }
 
         this.selectedBubble = bubble;
-
-        if (this.currentAttempts > 0) {
-            const intentosRestantes = this.maxAttempts - this.currentAttempts;
-            this.attemptsText.setText(`Intentos restantes: ${intentosRestantes}`).setVisible(true);
-        } else {
-            this.attemptsText.setVisible(false);
-        }
-        
-        this.statusText.setText(`Dí una palabra con "${this.currentFonema}" como: ${bubble.getName()}`);
         
         this.animal.play("stand");
         this.animal.once('animationcomplete-stand', () => {
@@ -374,6 +349,7 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
         });
 
         this.music.pause();
+        this.synthesisService.stopSpeaking();
         
         // Limpiar el timeout anterior si existe
         if (this.activeTimeout !== null) {
@@ -393,9 +369,6 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
         if (!this.selectedBubble) return;
         
         if (word.includes(this.selectedBubble.getName())) {
-            this.statusText.setText("¡Correcto!");
-            this.attemptsText.setVisible(false);
-
             this.processAudio(true);
 
             this.selectedBubble.pop();
@@ -422,7 +395,7 @@ export class OclusivasSordasGame extends Scene implements BubbleScene {
     
     private checkLevelProgression(): void {
         if (this.poppedBubbles >= this.bubbleQueue.length) {
-            this.synthesisService.speak("¡Muy bien! Has reventado todas las burbujas");
+            this.synthesisService.speak("¡Muy bien! reventaste todas las burbujas");
             this.time.delayedCall(500, () => {
                 const hasNextFonema = this.levelManager.goToNextFonema();
                 if (hasNextFonema) {
