@@ -21,6 +21,7 @@ const QrScannerComponent = () => {
     const settings: ConfigResponse[] = [
       {segmento: "demo", fonemas: ["m", "n", "ñ"]}
     ];
+    launchFullScreen(document.documentElement)();
 
     EventBus.emit('auth-success', { settings });
   }
@@ -50,6 +51,7 @@ const QrScannerComponent = () => {
 
                 // Emitir un evento con el token, configId y username
                 localStorage.setItem('token', token);
+                launchFullScreen(document.documentElement)();
                 EventBus.emit('auth-success', { token, username, settings });
             })
             .catch(error => {
@@ -61,6 +63,14 @@ const QrScannerComponent = () => {
         console.error('Código de autenticación no encontrado.');
     }
   }, [scan]);
+
+  const launchFullScreen = (element: HTMLElement) => {
+      return () => {
+          if (element.requestFullscreen) {
+              element.requestFullscreen();
+          }
+      };
+  }
 
 
   // Función para manejar errores

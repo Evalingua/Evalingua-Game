@@ -83,7 +83,7 @@ export const Configuration: ConfigStructure = {
     },
     "oclusivas_sordas": {
         levelConfig: {
-            bg_image: "bg_jungle",
+            bg_image: "bg_beach",
             bg_music: "nasales-sound",
         },
         fonemasConfig: {
@@ -136,7 +136,7 @@ export const Configuration: ConfigStructure = {
     },
     "oclusivas_sonoras": {
         levelConfig: {
-            bg_image: "bg_jungle",
+            bg_image: "bg_desert",
             bg_music: "nasales-sound",
         },
         fonemasConfig: {

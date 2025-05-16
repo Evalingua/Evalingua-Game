@@ -5,9 +5,8 @@ import { SpeechSynthesisService } from "../../../services/SpeechSynthesisService
 import { SpeechRecognitionService } from "../../../services/SpeechRecognitionService";
 import { Configuration, MapConfig } from "../../config/Configuration";
 import { LevelManager } from "../../LevelManager";
-import { BubbleScene } from "../../templates/BubbleScene";
 
-export class DemoGame extends Scene implements BubbleScene{
+export class DemoGame extends Scene{
     camera: Phaser.Cameras.Scene2D.Camera;
     background: Phaser.GameObjects.Image;
     gameText: Phaser.GameObjects.Text;
@@ -25,15 +24,12 @@ export class DemoGame extends Scene implements BubbleScene{
     private _isBubbleActive: boolean = false;
     private currentFonema: string | null = null;
     private poppedBubbles: number = 0;
-    //private statusText: Phaser.GameObjects.Text;
-    //private fonemaText: Phaser.GameObjects.Text;
     private synthesisService: SpeechSynthesisService;
     private recognitionService: SpeechRecognitionService;
     private currentBubbleIndex: number = -1;
     private bubbleQueue: ObjectConfig[] = [];
     private currentAttempts: number = 0;
     private maxAttempts: number = 3;
-    //private attemptsText: Phaser.GameObjects.Text;
     private audioToProcess: { filename: string, success: boolean, palabra: string, posicion: string } | null = null;
     private levelConfiguration: MapConfig;
 
@@ -42,7 +38,6 @@ export class DemoGame extends Scene implements BubbleScene{
     private baseHeight = 768;
     private bubbleXRatio   = 312 / this.baseWidth;
     private bubbleYShow     = 384 / this.baseHeight;
-    //private bubbleYStart    = 800 / this.baseHeight;
     private animalXRatio   = 660 / this.baseWidth;
     private animalYRatio   = 400 / this.baseHeight;
     
@@ -147,14 +142,14 @@ export class DemoGame extends Scene implements BubbleScene{
             duration: 1000,
             ease: 'Power1',
             onComplete: () => {
-            bubble.setPosition(
-                this.bubbleXRatio * this.scale.gameSize.width,
-                this.bubbleYShow * this.scale.gameSize.height
-            );
-            this.synthesisService.speak('Mira, ¿qué es eso?');
-            this.handPointer.setVisible(true);
-            this.handPointer.play("handPointerAnimation");
-            bubble.addFloatingAnimation();
+                bubble.setPosition(
+                    this.bubbleXRatio * this.scale.gameSize.width,
+                    this.bubbleYShow * this.scale.gameSize.height
+                );
+                this.synthesisService.speak('Mira, ¿qué es eso?');
+                this.handPointer.setVisible(true);
+                this.handPointer.play("handPointerAnimation");
+                bubble.addFloatingAnimation();
             }
         });
         } else {
@@ -243,6 +238,7 @@ export class DemoGame extends Scene implements BubbleScene{
         this.currentAttempts++;
         this.music.resume();
         this.handPointer.setVisible(true);
+        this.animal.play("idle");
         this.handPointer.play("handPointerAnimation");
         
         if (this.currentAttempts >= this.maxAttempts) {
