@@ -5,9 +5,10 @@ import { AUTO, Game } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import { ConfigResponse } from '../types/config.type';
 import { SegmentScenes } from './SegmentScene';
+import { LevelTransition } from './scenes/levels/LevelTransition';
 
 const StartGame = (parent: string, gameSettings: ConfigResponse[] | null) => {
-    const baseScenes = [Boot, Preloader, MainMenu, GameOver];
+    const baseScenes = [Boot, Preloader, MainMenu, GameOver, LevelTransition];
 
     const dynamicScenes = gameSettings ? gameSettings.map( setting => {
         const BaseScene = SegmentScenes[setting.segmento];

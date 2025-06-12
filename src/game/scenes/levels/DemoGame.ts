@@ -33,6 +33,9 @@ export class DemoGame extends Scene{
     private audioToProcess: { filename: string, success: boolean, palabra: string, posicion: string } | null = null;
     private levelConfiguration: MapConfig;
 
+    // Array para trackear animaciones creadas en esta escena
+    private createdAnimations: string[] = [];
+
     // Responsivo
     private baseWidth  = 1024;
     private baseHeight = 768;
@@ -49,6 +52,7 @@ export class DemoGame extends Scene{
         this.recognitionService = SpeechRecognitionService.getInstance();
         this.levelManager = LevelManager.getInstance();
         this.levelConfiguration = Configuration["nasales"];
+        this.createdAnimations = [];
     }
 
     create() {
@@ -66,6 +70,9 @@ export class DemoGame extends Scene{
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
         this.background = this.add.image(0, 0, this.levelConfiguration.levelConfig.bg_image).setOrigin(0).setScale(1);
+        
+        // Detener música anterior si existe
+        this.sound.stopAll();
         this.music = this.sound.add(this.levelConfiguration.levelConfig.bg_music, { loop: true, volume: 0.1 });
         this.music.play();
         
@@ -78,13 +85,15 @@ export class DemoGame extends Scene{
 
         this.handPointer = this.add.sprite(0, 0, "hand_pointer").setScale(2).setOrigin(0).setDepth(100);
         this.handPointer.setVisible(false);
-        this.anims.create({
+        
+        // Crear animación del hand pointer con verificación
+        this.createAnimationIfNotExists("handPointerAnimation", () => ({
             key: "handPointerAnimation",
             frames: this.anims.generateFrameNumbers("hand_pointer", { start: 0, end: 2 }),
             frameRate: 5,
             repeat: -1,
             yoyo: true
-        });
+        }));
 
         this.scale.on('resize', this.onResize, this);
         const { width, height } = this.scale.gameSize;
@@ -93,23 +102,36 @@ export class DemoGame extends Scene{
         EventBus.emit("current-scene-ready", this);
     }
 
+    // Método helper para crear animaciones únicamente si no existen
+    private createAnimationIfNotExists(key: string, configFactory: () => Phaser.Types.Animations.Animation): void {
+        if (!this.anims.exists(key)) {
+            this.anims.create(configFactory());
+            this.createdAnimations.push(key);
+        }
+    }
+
     private setupAnimalAnimations(): void {
         const fonemaConfig = this.levelConfiguration.fonemasConfig[this.currentFonema || "m"];
         if (!fonemaConfig) return;
+        
         const { key, animation } = fonemaConfig.animal;
         this.animal = this.add.sprite(0, 0, key)
-        .setScale(fonemaConfig.animal.scale || 1);
+            .setScale(fonemaConfig.animal.scale || 1);
+        
         animation.forEach(anim => {
-        this.anims.create({
-            key: anim.key,
-            frames: this.anims.generateFrameNumbers(key, {
-            start: anim.frames.start,
-            end: anim.frames.end
-            }),
-            frameRate: anim.frameRate,
-            repeat: anim.repeat || 0,
-            yoyo: anim.yoyo || false
-        });
+            // Crear clave única para cada animación basada en el fonema y el segmento
+            const uniqueKey = `${anim.key}_${this.currentFonema}_${this.segmento}`;
+            
+            this.createAnimationIfNotExists(uniqueKey, () => ({
+                key: uniqueKey,
+                frames: this.anims.generateFrameNumbers(key, {
+                    start: anim.frames.start,
+                    end: anim.frames.end
+                }),
+                frameRate: anim.frameRate,
+                repeat: anim.repeat || 0,
+                yoyo: anim.yoyo || false
+            }));
         });
     }
     
@@ -123,37 +145,39 @@ export class DemoGame extends Scene{
 
     private showNextBubble(): void {
         this.currentBubbleIndex++;
-        this.animal.play("idle");
+        // Usar la clave única de animación
+        const idleKey = `idle_${this.currentFonema}_${this.segmento}`;
+        this.animal.play(idleKey);
         this.resetAttempts();
 
         if (this.currentBubbleIndex < this.bubbleQueue.length) {
-        const objConfig = this.bubbleQueue[this.currentBubbleIndex];
-        const bubble = new Bubble(this, {
-            ...objConfig,
-            x: this.bubbleXRatio * this.scale.gameSize.width, 
-            y: this.bubbleYShow * this.scale.gameSize.height + 500
-        });
-        this.bubbles.push(bubble);
+            const objConfig = this.bubbleQueue[this.currentBubbleIndex];
+            const bubble = new Bubble(this, {
+                ...objConfig,
+                x: this.bubbleXRatio * this.scale.gameSize.width, 
+                y: this.bubbleYShow * this.scale.gameSize.height + 500
+            });
+            this.bubbles.push(bubble);
 
-        // Entrada animada
-        this.tweens.add({
-            targets: [bubble.getBubbleSprite(), bubble.getObjectSprite()],
-            y: this.bubbleYShow * this.scale.gameSize.height,
-            duration: 1000,
-            ease: 'Power1',
-            onComplete: () => {
-                bubble.setPosition(
-                    this.bubbleXRatio * this.scale.gameSize.width,
-                    this.bubbleYShow * this.scale.gameSize.height
-                );
-                this.synthesisService.speak('Mira, ¿qué es eso?');
-                this.handPointer.setVisible(true);
-                this.handPointer.play("handPointerAnimation");
-                bubble.addFloatingAnimation();
-            }
-        });
+            // Entrada animada
+            this.tweens.add({
+                targets: [bubble.getBubbleSprite(), bubble.getObjectSprite()],
+                y: this.bubbleYShow * this.scale.gameSize.height,
+                duration: 1000,
+                ease: 'Power1',
+                onComplete: () => {
+                    bubble.setPosition(
+                        this.bubbleXRatio * this.scale.gameSize.width,
+                        this.bubbleYShow * this.scale.gameSize.height
+                    );
+                    this.synthesisService.speak('Mira, se llama ' + bubble.getName() + ', toca la burbuja y repite');
+                    this.handPointer.setVisible(true);
+                    this.handPointer.play("handPointerAnimation");
+                    bubble.addFloatingAnimation();
+                }
+            });
         } else {
-        this.checkLevelProgression();
+            this.checkLevelProgression();
         }
     }
     
@@ -179,30 +203,29 @@ export class DemoGame extends Scene{
 
         // Fondo
         this.background
-            .setDisplaySize(width, height)       // fuerza ancho = canvas width y alto = canvas height
-            .setPosition(0, 0);                  // origen al borde superior-izquierdo
+            .setDisplaySize(width, height)
+            .setPosition(0, 0);
 
-        // Si además quieres mantener el origen en 0,0:
         this.background.setOrigin(0);
 
         // Animal
         this.animal
-        .setPosition(width * this.animalXRatio, height * this.animalYRatio)
+            .setPosition(width * this.animalXRatio, height * this.animalYRatio)
 
         // Reposicionar burbujas existentes
         this.bubbles.forEach(bubble => {
-        bubble.setPosition(
-            width * this.bubbleXRatio,
-            height * this.bubbleYShow
-        );})
+            bubble.setPosition(
+                width * this.bubbleXRatio,
+                height * this.bubbleYShow
+            );
+        })
 
         // Reposicionar handPointer
         this.handPointer
-        .setPosition(width * this.bubbleXRatio, height * this.bubbleYShow);
+            .setPosition(width * this.bubbleXRatio, height * this.bubbleYShow);
     }
     
     private setupSpeechRecognitionHandlers(): void {
-
         this.recognitionService.onResult((transcript: string) => {
             this.checkBubblePopByWord(transcript);
         });
@@ -218,7 +241,6 @@ export class DemoGame extends Scene{
             if (this.selectedBubble && !this.selectedBubble.isPopped) {
                 this.handleFailedAttempt();
             }
-
             this._isBubbleActive = false;
         });
 
@@ -228,7 +250,8 @@ export class DemoGame extends Scene{
                 this.handleFailedAttempt();
             }
             this._isBubbleActive = false;
-            this.animal.play("idle");
+            const idleKey = `idle_${this.currentFonema}_${this.segmento}`;
+            this.animal.play(idleKey);
         })
     }
 
@@ -238,7 +261,8 @@ export class DemoGame extends Scene{
         this.currentAttempts++;
         this.music.resume();
         this.handPointer.setVisible(true);
-        this.animal.play("idle");
+        const idleKey = `idle_${this.currentFonema}_${this.segmento}`;
+        this.animal.play(idleKey);
         this.handPointer.play("handPointerAnimation");
         
         if (this.currentAttempts >= this.maxAttempts) {
@@ -260,7 +284,6 @@ export class DemoGame extends Scene{
         this.audioToProcess = null;
     }
 
-    
     public onBubbleSelected(bubble: Bubble): void {
         if (this._isBubbleActive) return;
         
@@ -274,9 +297,12 @@ export class DemoGame extends Scene{
         this.handPointer.setVisible(false);
         this.handPointer.stop();
         
-        this.animal.play("stand");
-        this.animal.once('animationcomplete-stand', () => {
-            this.animal.play("doubt");
+        const standKey = `stand_${this.currentFonema}_${this.segmento}`;
+        const doubtKey = `doubt_${this.currentFonema}_${this.segmento}`;
+        
+        this.animal.play(standKey);
+        this.animal.once(`animationcomplete-${standKey}`, () => {
+            this.animal.play(doubtKey);
         });
 
         this.music.pause();
@@ -318,7 +344,8 @@ export class DemoGame extends Scene{
     public onBubblePopped(bubble: Bubble): void {
         if (bubble.isPopped) {
             this.poppedBubbles++;
-            this.animal.play("celebrate");
+            const celebrateKey = `celebrate_${this.currentFonema}_${this.segmento}`;
+            this.animal.play(celebrateKey);
 
             this.music.resume();
             
@@ -335,14 +362,19 @@ export class DemoGame extends Scene{
                 const hasNextFonema = this.levelManager.goToNextFonema();
                 if (hasNextFonema) {
                     this.button = this.add.sprite(this.bubbleXRatio * this.scale.gameSize.width, this.bubbleYShow * this.scale.gameSize.height, 'orangeButton').setScale(8);
-                    this.anims.create({
-                        key: "shine",
+                    
+                    // Crear animación del botón con verificación
+                    const shineKey = `shine_${this.currentFonema}_${this.segmento}`;
+                    this.createAnimationIfNotExists(shineKey, () => ({
+                        key: shineKey,
                         frames: this.anims.generateFrameNumbers("orangeButton", { start: 90, end: 92 }),
                         frameRate: 5,
                         repeat: -1
-                    });
-                    this.animal.play("celebrate");
-                    this.button.play("shine");
+                    }));
+                    
+                    const celebrateKey = `celebrate_${this.currentFonema}_${this.segmento}`;
+                    this.animal.play(celebrateKey);
+                    this.button.play(shineKey);
                     this.button.setInteractive();
                     this.button.on("pointerdown", () => {
                         this.cleanup();
@@ -371,17 +403,38 @@ export class DemoGame extends Scene{
             clearTimeout(this.activeTimeout);
         }
 
-        this.button.destroy();
+        if (this.button) {
+            this.button.destroy();
+        }
+        
         this.poppedBubbles = 0;
         this._isBubbleActive = false;
         this.selectedBubble = null;
         this.synthesisService.stopSpeaking();
         this.resetAttempts();
-        this.music.stop();
-        this.music.destroy();
+        
+        // Detener y limpiar música
+        if (this.music) {
+            this.music.stop();
+            this.music.destroy();
+        }
+        
+        // Detener todos los sonidos de la escena
+        this.sound.stopAll();
     }
     
     shutdown(): void {
         this.cleanup();
+        
+        // Limpiar animaciones creadas en esta escena
+        this.createdAnimations.forEach(key => {
+            if (this.anims.exists(key)) {
+                this.anims.remove(key);
+            }
+        });
+        this.createdAnimations = [];
+        
+        // Limpiar eventos de resize
+        this.scale.off('resize', this.onResize, this);
     }
 }

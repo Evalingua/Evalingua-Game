@@ -22,5 +22,6 @@ export const SegmentScenes: SegmentComponentMap = {
     'laterales': LateralesGame,
     'roticas_percusivas': RoticasPercusivasGame,
     'roticas_vibrantes': RoticasVibrantesGame,
-    'demo': DemoGame
+    'demo': DemoGame,
+    'demo2': DemoGame,
 }

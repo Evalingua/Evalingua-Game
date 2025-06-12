@@ -56,6 +56,8 @@ export class LevelManager {
   public goToNextLevel(): void {
     if (!this.gameSettings || !this.game) return;
 
+    // Detener sonidos y la escena actual
+    this.game.sound.stopAll();
     this.game.scene.stop(this.gameSettings[this.currentLevelIndex].segmento);
     
     this.currentLevelIndex++;
@@ -65,7 +67,8 @@ export class LevelManager {
     if (this.currentLevelIndex < this.gameSettings.length) {
       const nextSegment = this.gameSettings[this.currentLevelIndex].segmento;
       if (SegmentScenes[nextSegment]) {
-        this.game.scene.start(nextSegment);
+        // En lugar de ir directamente al siguiente nivel, mostrar la pantalla de transición
+        this.game.scene.start('LevelTransition');
       } else {
         this.game.scene.start('GameOver');
       }
@@ -91,5 +94,25 @@ export class LevelManager {
 
   public getFonemaIndex(): number {
     return this.currentFonemaIndex;
+  }
+
+  public getCurrentLevelIndex(): number {
+    return this.currentLevelIndex;
+  }
+
+  public getTotalLevels(): number {
+    return this.gameSettings ? this.gameSettings.length : 0;
+  }
+
+  public getProgress(): { currentLevel: number; totalLevels: number; percentage: number } {
+    const totalLevels = this.getTotalLevels();
+    const currentLevel = this.currentLevelIndex + 1;
+    const percentage = totalLevels > 0 ? (currentLevel / totalLevels) * 100 : 0;
+    
+    return {
+      currentLevel,
+      totalLevels,
+      percentage
+    };
   }
 }

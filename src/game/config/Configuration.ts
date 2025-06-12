@@ -42,7 +42,7 @@ export const Configuration: ConfigStructure = {
                         { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 5, frames: { start: 24, end: 27 }, repeat: -1 }
+                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
                     ]
                 }
             },
@@ -59,7 +59,7 @@ export const Configuration: ConfigStructure = {
                         { key: "idle", frameRate: 5, frames: { start: 0, end: 3 }, repeat: -1 },
                         { key: "stand", frameRate: 7, frames: { start: 8, end: 11 }, repeat: 0 },
                         { key: "doubt", frameRate: 4, frames: { start: 16, end: 20 }, repeat: -1, yoyo: true },
-                        { key: "celebrate", frameRate: 5, frames: { start: 24, end: 27 }, repeat: -1 }
+                        { key: "celebrate", frameRate: 7, frames: { start: 24, end: 27 }, repeat: 2 }
                     ]
                 }
             },

@@ -19,7 +19,8 @@ const QrScannerComponent = () => {
 
   const handleDemoLevel = () => {
     const settings: ConfigResponse[] = [
-      {segmento: "demo", fonemas: ["m", "n", "ñ"]}
+      {segmento: "demo", fonemas: ["m"]},
+      {segmento: "demo2", fonemas: ["ñ"]}
     ];
     launchFullScreen(document.documentElement)();
 

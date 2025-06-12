@@ -92,7 +92,10 @@ export class MainMenu extends Scene
     
     changeScene ()
     {
-
+        this.background.destroy();
+        this.logo.destroy();
+        this.title.destroy();
+        this.logoTween?.stop();
         this.rectangleClick.disableInteractive(); 
         this.rectangleClick.destroy();
         this.music.stop();

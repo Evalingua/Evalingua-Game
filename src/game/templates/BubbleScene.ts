@@ -42,6 +42,8 @@ export class BubbleScene extends Phaser.Scene {
     private audioToProcess: { filename: string, success: boolean, palabra: string, posicion: string } | null = null;
     private levelConfiguration: MapConfig;
 
+    private createdAnimations: string[] = [];
+
     private baseWidth  = 1024;
     private baseHeight = 768;
     private bubbleXRatio   = 312 / this.baseWidth;
@@ -61,6 +63,7 @@ export class BubbleScene extends Phaser.Scene {
         this.username = auth.getUserName();
         this.backendService = new BackendService();
         this.levelConfiguration = Configuration[this.segmento];
+        this.createdAnimations = [];
     }
 
     create() {
@@ -79,6 +82,8 @@ export class BubbleScene extends Phaser.Scene {
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
         this.background = this.add.image(0, 0, this.levelConfiguration.levelConfig.bg_image).setOrigin(0).setScale(1);
+        
+        this.sound.stopAll();
         this.music = this.sound.add(this.levelConfiguration.levelConfig.bg_music, { loop: true, volume: 0.1 });
         this.music.play();
         
@@ -91,19 +96,27 @@ export class BubbleScene extends Phaser.Scene {
 
         this.handPointer = this.add.sprite(0, 0, "hand_pointer").setScale(2).setOrigin(0).setDepth(100);
         this.handPointer.setVisible(false);
-        this.anims.create({
+
+        this.createAnimationIfNotExists("handPointerAnimation", () => ({
             key: "handPointerAnimation",
             frames: this.anims.generateFrameNumbers("hand_pointer", { start: 0, end: 2 }),
             frameRate: 5,
             repeat: -1,
             yoyo: true
-        });
+        }));
 
         this.scale.on('resize', this.onResize, this);
         const { width, height } = this.scale.gameSize;
         this.onResize({ width, height });
         
         EventBus.emit("current-scene-ready", this);
+    }
+
+    private createAnimationIfNotExists(key: string, configFactory: () => Phaser.Types.Animations.Animation): void {
+        if (!this.anims.exists(key)) {
+            this.anims.create(configFactory());
+            this.createdAnimations.push(key);
+        }
     }
 
     private async createNewAudio(filename: string, url: string, palabra: string, posicion: string): Promise<void> {
@@ -140,17 +153,25 @@ export class BubbleScene extends Phaser.Scene {
     private setupAnimalAnimations(): void {
         const fonemaConfig = this.levelConfiguration.fonemasConfig[this.currentFonema || "m"];
         if (!fonemaConfig) return;
-
+        
         const { key, animation } = fonemaConfig.animal;
-        this.animal = this.add.sprite(0, 0, key).setScale(fonemaConfig.animal.scale || 1);
+        this.animal = this.add.sprite(0, 0, key)
+            .setScale(fonemaConfig.animal.scale || 1);
+        
         animation.forEach(anim => {
-            this.anims.create({
-                key: anim.key,
-                frames: this.anims.generateFrameNumbers(key, { start: anim.frames.start, end: anim.frames.end }),
+            // Crear clave única para cada animación basada en el fonema y el segmento
+            const uniqueKey = `${anim.key}_${this.currentFonema}_${this.segmento}`;
+            
+            this.createAnimationIfNotExists(uniqueKey, () => ({
+                key: uniqueKey,
+                frames: this.anims.generateFrameNumbers(key, {
+                    start: anim.frames.start,
+                    end: anim.frames.end
+                }),
                 frameRate: anim.frameRate,
                 repeat: anim.repeat || 0,
                 yoyo: anim.yoyo || false
-            });
+            }));
         });
     }
     
@@ -171,8 +192,8 @@ export class BubbleScene extends Phaser.Scene {
 
     private showNextBubble(): void {
         this.currentBubbleIndex++;
-        this.animal.play("idle");
-
+        const idleKey = `idle_${this.currentFonema}_${this.segmento}`;
+        this.animal.play(idleKey);
         this.resetAttempts();
         
         if (this.currentBubbleIndex < this.bubbleQueue.length) {
@@ -197,7 +218,7 @@ export class BubbleScene extends Phaser.Scene {
                         this.bubbleXRatio * this.scale.gameSize.width,
                         this.bubbleYShow * this.scale.gameSize.height
                     );
-                    this.synthesisService.speak('Mira, ¿qué es eso?');
+                    this.synthesisService.speak('Mira, eso es ' + bubble.getName() + ', toca la burbuja y repite');
                     this.handPointer.setVisible(true);
                     this.handPointer.play("handPointerAnimation");
                     bubble.addFloatingAnimation();
@@ -298,7 +319,8 @@ export class BubbleScene extends Phaser.Scene {
         this.currentAttempts++;
         this.music.resume();
         this.handPointer.setVisible(true);
-        this.animal.play("idle");
+        const idleKey = `idle_${this.currentFonema}_${this.segmento}`;
+        this.animal.play(idleKey);
         this.handPointer.play("handPointerAnimation");
         
         if (this.currentAttempts >= this.maxAttempts) {
@@ -363,10 +385,13 @@ export class BubbleScene extends Phaser.Scene {
         this.selectedBubble = bubble;
         this.handPointer.setVisible(false);
         this.handPointer.stop();
+
+        const standKey = `stand_${this.currentFonema}_${this.segmento}`;
+        const doubtKey = `doubt_${this.currentFonema}_${this.segmento}`;
         
-        this.animal.play("stand");
-        this.animal.once('animationcomplete-stand', () => {
-            this.animal.play("doubt");
+        this.animal.play(standKey);
+        this.animal.once(`animationcomplete-${standKey}`, () => {
+            this.animal.play(doubtKey);
         });
 
         this.music.pause();
@@ -409,7 +434,10 @@ export class BubbleScene extends Phaser.Scene {
         if (bubble.isPopped) {
             this.poppedBubbles++;
             this.music.resume();
-            this.animal.play("celebrate");
+            const celebrateKey = `celebrate_${this.currentFonema}_${this.segmento}`;
+            this.animal.play(celebrateKey);
+
+            this.music.resume();
             
             this.time.delayedCall(800, () => {
                 this.showNextBubble();
@@ -419,19 +447,21 @@ export class BubbleScene extends Phaser.Scene {
     
     private checkLevelProgression(): void {
         if (this.poppedBubbles >= this.bubbleQueue.length) {
-            this.synthesisService.speak("¡Muy bien! reventaste todas las burbujas");
+            this.synthesisService.speak("¡Muy bien! terminamos el nivel!");
             this.time.delayedCall(500, () => {
                 const hasNextFonema = this.levelManager.goToNextFonema();
                 if (hasNextFonema) {
                     this.button = this.add.sprite(900, 384, 'orangeButton').setScale(3);
-                    this.anims.create({
-                        key: "shine",
+                    const shineKey = `shine_${this.currentFonema}_${this.segmento}`;
+                    this.createAnimationIfNotExists(shineKey, () => ({
+                        key: shineKey,
                         frames: this.anims.generateFrameNumbers("orangeButton", { start: 90, end: 92 }),
                         frameRate: 5,
                         repeat: -1
-                    });
-                    this.button.play("shine");
-                    this.animal.play("celebrate");
+                    }));
+                    const celebrateKey = `celebrate_${this.currentFonema}_${this.segmento}`;
+                    this.animal.play(celebrateKey);
+                    this.button.play(shineKey);
                     this.button.setInteractive();
                     this.button.on("pointerdown", () => {
                         this.cleanup();
@@ -466,11 +496,24 @@ export class BubbleScene extends Phaser.Scene {
         this.selectedBubble = null;
         this.synthesisService.stopSpeaking();
         this.resetAttempts();
-        this.music.stop();
-        this.music.destroy();
+        if (this.music) {
+            this.music.stop();
+            this.music.destroy();
+        }
+        this.sound.stopAll();
     }
     
     shutdown(): void {
         this.cleanup();
+
+        this.createdAnimations.forEach(key => {
+            if (this.anims.exists(key)) {
+                this.anims.remove(key);
+            }
+        });
+        this.createdAnimations = [];
+        
+        // Limpiar eventos de resize
+        this.scale.off('resize', this.onResize, this);
     }
 }
